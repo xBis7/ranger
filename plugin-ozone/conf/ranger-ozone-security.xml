@@ -43,7 +43,7 @@
 
 	<property>
 		<name>ranger.plugin.ozone.policy.rest.ssl.config.file</name>
-		<value>/etc/ozone/conf/ranger-policymgr-ssl.xml</value>
+		<value>/etc/hadoop/ranger-policymgr-ssl.xml</value>
 		<description>
 			Path to the file containing SSL details to contact Ranger Admin
 		</description>
