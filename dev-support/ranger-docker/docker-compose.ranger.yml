@@ -8,7 +8,8 @@ services:
         - RANGER_VERSION=${RANGER_VERSION}
         - RANGER_DB_TYPE=${RANGER_DB_TYPE}
         - RANGER_ADMIN_JAVA_VERSION=${RANGER_ADMIN_JAVA_VERSION}
-    image: ranger:latest
+#    image: ranger:latest
+    image: apache/ranger:2.4.0
     container_name: ranger
     hostname: ranger.example.com
     stdin_open: true
