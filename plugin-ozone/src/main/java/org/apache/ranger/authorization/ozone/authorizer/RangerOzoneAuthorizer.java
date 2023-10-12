@@ -21,7 +21,6 @@
 package org.apache.ranger.authorization.ozone.authorizer;
 
 import com.google.common.collect.Sets;
-import org.apache.hadoop.ozone.OzoneConsts;
 import org.apache.hadoop.ozone.security.acl.IAccessAuthorizer;
 import org.apache.hadoop.ozone.security.acl.IOzoneObj;
 import org.apache.hadoop.ozone.security.acl.OzoneObj;
@@ -38,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.Objects;
 
 public class RangerOzoneAuthorizer implements IAccessAuthorizer {
 	public static final String ACCESS_TYPE_READ = "read";
@@ -119,8 +117,6 @@ public class RangerOzoneAuthorizer implements IAccessAuthorizer {
 		String action = accessType;
 		String clusterName = rangerPlugin.getClusterName();
 
-		LOG.info("### xbis: owner: " + context.getOwnerName() + " | action: " + action);
-
 		RangerAccessRequestImpl rangerRequest = new RangerAccessRequestImpl();
 		rangerRequest.setUser(ugi.getShortUserName());
 		rangerRequest.setUserGroups(Sets.newHashSet(ugi.getGroupNames()));
@@ -130,28 +126,7 @@ public class RangerOzoneAuthorizer implements IAccessAuthorizer {
 
 		RangerAccessResourceImpl rangerResource = new RangerAccessResourceImpl();
 
-		// 'context.getOwnerName()' returns the owner of the parent object for keys.
-		if (Objects.equals(ozoneObj.getResourceType(), OzoneObj.ResourceType.KEY)) {
-			// The user is also the owner of the parent object
-			if (Objects.equals(context.getOwnerName(), ugi.getShortUserName())) {
-				return true;
-			}
-			if (Objects.equals(action, ACCESS_TYPE_CREATE) ||
-					(Objects.equals(action, ACCESS_TYPE_DELETE) &&
-							ozoneObj.getKeyName().contains(OzoneConsts.FS_FILE_COPYING_TEMP_SUFFIX))) {
-				rangerResource.setOwnerUser(ugi.getShortUserName());
-			}
-			// If action is something other than the above, we can't know the key owner
-			// without checking the key ACLs from the OM. e.g. rename or delete of an existing key.
-			// 'context.getOwnerName()' returns the owner of the parent object and
-			// 'ugi' will have the info of the current caller.
-
-			// Having an in memory-map on Ranger to keep track of all the keys and their owners isn't feasible.
-			// We need to get the info in Ozone-side and pass it as a parameter in checkAccess.
-			// It can be part of the existing parameters.
-		} else {
-			rangerResource.setOwnerUser(context.getOwnerName());
-		}
+		rangerResource.setOwnerUser(context.getOwnerName());
 
 		rangerRequest.setResource(rangerResource);
 		rangerRequest.setAccessType(accessType);
@@ -196,8 +171,11 @@ public class RangerOzoneAuthorizer implements IAccessAuthorizer {
 			LOG.debug("rangerRequest=" + rangerRequest + ", return="
 					+ returnValue);
 		}
-		LOG.info("### xbis: rangerRequest=\n" + rangerRequest + ", return="
-				+ returnValue);
+		LOG.info("### xbis: action: " + action +
+						 "\n | owner: " + context.getOwnerName() +
+						 "\n | request user: " + rangerRequest.getUser() +
+						 "\n | resource: " + rangerRequest.getResource().getAsString() +
+						 "\n | return:" + returnValue);
 		return returnValue;
 	}
 
