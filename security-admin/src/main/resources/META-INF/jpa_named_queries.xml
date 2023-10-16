@@ -324,7 +324,7 @@
 	</named-query>
 
 	<named-query name="XXTrxLog.findByTrxId">
-		<query>SELECT obj FROM XXTrxLog obj WHERE obj.transactionId = :transactionId
+		<query>SELECT obj FROM XXTrxLog obj WHERE obj.transactionId = :transactionId order by obj.id
 		</query>
 	</named-query>
 
@@ -1785,6 +1785,18 @@
             SELECT obj.id, obj.name FROM XXSecurityZone obj WHERE obj.id != :unzoneId
         </query>
     </named-query>
+
+	<named-query name="XXSecurityZone.findAllZoneHeaderInfosByServiceId">
+		<query>
+			select obj.id, obj.name from XXSecurityZone obj where obj.id in (select ref.zoneId from XXSecurityZoneRefService ref where ref.serviceId = :serviceId)
+		</query>
+	</named-query>
+
+	<named-query name="XXSecurityZone.findAllZoneHeaderInfosByTagServiceId">
+		<query>
+			select obj.id, obj.name from XXSecurityZone obj where obj.id in (select ref.zoneId from XXSecurityZoneRefTagService ref where ref.tagServiceId = :tagServiceId)
+		</query>
+	</named-query>
 
     <named-query name="XXGlobalState.findByStateId">
         <query>

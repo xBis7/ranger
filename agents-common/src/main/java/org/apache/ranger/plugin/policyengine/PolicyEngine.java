@@ -36,6 +36,7 @@ import org.apache.ranger.plugin.contextenricher.RangerContextEnricher;
 import org.apache.ranger.plugin.model.RangerPolicy;
 import org.apache.ranger.plugin.model.RangerPolicyDelta;
 import org.apache.ranger.plugin.model.RangerServiceDef;
+import org.apache.ranger.plugin.model.validation.RangerServiceDefHelper;
 import org.apache.ranger.plugin.model.validation.RangerZoneResourceMatcher;
 import org.apache.ranger.plugin.policyevaluator.RangerPolicyEvaluator;
 import org.apache.ranger.plugin.policyresourcematcher.RangerPolicyResourceMatcher;
@@ -47,6 +48,7 @@ import org.apache.ranger.plugin.util.RangerPolicyDeltaUtil;
 import org.apache.ranger.plugin.util.RangerResourceEvaluatorsRetriever;
 import org.apache.ranger.plugin.util.RangerReadWriteLock;
 import org.apache.ranger.plugin.util.RangerRoles;
+import org.apache.ranger.plugin.util.ServiceDefUtil;
 import org.apache.ranger.plugin.util.ServicePolicies;
 import org.apache.ranger.plugin.util.StringTokenReplacer;
 import org.slf4j.Logger;
@@ -58,6 +60,7 @@ public class PolicyEngine {
     private static final Logger PERF_POLICYENGINE_INIT_LOG       = RangerPerfTracer.getPerfLogger("policyengine.init");
     private static final Logger PERF_POLICYENGINE_REBALANCE_LOG  = RangerPerfTracer.getPerfLogger("policyengine.rebalance");
 
+    private final RangerServiceDefHelper              serviceDefHelper;
     private final RangerPolicyRepository              policyRepository;
     private final RangerPolicyRepository              tagPolicyRepository;
     private final List<RangerContextEnricher>         allContextEnrichers;
@@ -117,6 +120,8 @@ public class PolicyEngine {
     public long getPolicyVersion() {
         return policyRepository.getPolicyVersion();
     }
+
+    public RangerServiceDefHelper getServiceDefHelper() { return serviceDefHelper; }
 
     public RangerPolicyRepository getPolicyRepository() {
         return policyRepository;
@@ -228,6 +233,7 @@ public class PolicyEngine {
         }
 
         policyRepository = new RangerPolicyRepository(servicePolicies, this.pluginContext);
+        serviceDefHelper = new RangerServiceDefHelper(policyRepository.getServiceDef(), false);
 
         ServicePolicies.TagPolicies tagPolicies = servicePolicies.getTagPolicies();
 
@@ -481,40 +487,31 @@ public class PolicyEngine {
     }
 
     synchronized static private void buildImpliedAccessGrants(ServicePolicies servicePolicies) {
-        buildImpliedAccessGrants(servicePolicies.getServiceDef());
-        if (servicePolicies.getTagPolicies() != null) {
-            buildImpliedAccessGrants(servicePolicies.getTagPolicies().getServiceDef());
+        RangerServiceDef serviceDef = servicePolicies.getServiceDef();
+
+        if (serviceDef != null) {
+            buildImpliedAccessGrants(ServiceDefUtil.normalize(serviceDef));
+
+            RangerServiceDef tagServiceDef = servicePolicies.getTagPolicies() != null ? servicePolicies.getTagPolicies().getServiceDef() : null;
+
+            if (tagServiceDef != null) {
+                buildImpliedAccessGrants(ServiceDefUtil.normalizeAccessTypeDefs(ServiceDefUtil.normalize(tagServiceDef), serviceDef.getName()));
+            }
         }
     }
 
     static private void buildImpliedAccessGrants(RangerServiceDef serviceDef) {
-        Map<String, Collection<String>> ret = null;
-
-        if (serviceDef != null && !CollectionUtils.isEmpty(serviceDef.getAccessTypes())) {
-            for (RangerServiceDef.RangerAccessTypeDef accessTypeDef : serviceDef.getAccessTypes()) {
-                if (!CollectionUtils.isEmpty(accessTypeDef.getImpliedGrants())) {
-                    if (ret == null) {
-                        ret = new HashMap<>();
-                    }
-
-                    Collection<String> impliedGrants = ret.get(accessTypeDef.getName());
-
-                    if (impliedGrants == null) {
-                        impliedGrants = new HashSet<>();
-
-                        ret.put(accessTypeDef.getName(), impliedGrants);
-                    }
-
-                    impliedGrants.addAll(accessTypeDef.getImpliedGrants());
-                }
-            }
+        if (serviceDef != null) {
+            RangerServiceDefHelper helper = new RangerServiceDefHelper(serviceDef, false);
 
             if (impliedAccessGrants == null) {
                 impliedAccessGrants = Collections.synchronizedMap(new HashMap<>());
             }
-            impliedAccessGrants.put(serviceDef.getName(), ret);
+
+            impliedAccessGrants.put(serviceDef.getName(), helper.getImpliedAccessGrants());
         }
     }
+
     private Set<String> getMatchedZonesForResourceAndChildren(Map<String, ?> resource, RangerAccessResource accessResource) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("==> PolicyEngine.getMatchedZonesForResourceAndChildren(" + resource + ", " + accessResource + ")");
@@ -582,6 +579,7 @@ public class PolicyEngine {
     private PolicyEngine(final PolicyEngine other, ServicePolicies servicePolicies) {
         this.useForwardedIPAddress = other.useForwardedIPAddress;
         this.trustedProxyAddresses = other.trustedProxyAddresses;
+        this.serviceDefHelper      = other.serviceDefHelper;
         this.pluginContext         = other.pluginContext;
         this.lock                  = other.lock;
 
