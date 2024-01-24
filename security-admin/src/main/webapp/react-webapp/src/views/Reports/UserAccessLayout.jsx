@@ -52,6 +52,7 @@ import SearchPolicyTable from "./SearchPolicyTable";
 import { isAuditor, isKeyAdmin, isKMSAuditor } from "../../utils/XAUtils";
 import CustomBreadcrumb from "../CustomBreadcrumb";
 import moment from "moment-timezone";
+import { getServiceDef } from "../../utils/appState";
 
 function UserAccessLayout() {
   const isKMSRole = isKeyAdmin() || isKMSAuditor();
@@ -68,6 +69,7 @@ function UserAccessLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = useQuery();
+  const { allServiceDefs } = getServiceDef();
 
   const showMoreLess = () => {
     setShow(!show);
@@ -92,19 +94,8 @@ function UserAccessLayout() {
   };
 
   const fetchData = async () => {
-    let serviceDefsResp;
     let servicesResp;
     let resourceServices;
-
-    try {
-      serviceDefsResp = await fetchApi({
-        url: `plugins/definitions`
-      });
-    } catch (error) {
-      console.error(
-        `Error occurred while fetching Service Definitions ! ${error}`
-      );
-    }
 
     try {
       servicesResp = await fetchApi({
@@ -120,10 +111,8 @@ function UserAccessLayout() {
       );
     }
 
-    let resourceServiceDefs = filter(
-      serviceDefsResp.data.serviceDefs,
-      (serviceDef) =>
-        isKMSRole ? serviceDef.name == "kms" : serviceDef.name != "kms"
+    let resourceServiceDefs = filter(allServiceDefs, (serviceDef) =>
+      isKMSRole ? serviceDef.name == "kms" : serviceDef.name != "kms"
     );
 
     let filterResourceServiceDefs = resourceServiceDefs;
@@ -138,12 +127,9 @@ function UserAccessLayout() {
       });
     }
 
-    let serviceDefsList = map(
-      serviceDefsResp.data.serviceDefs,
-      function (serviceDef) {
-        return { value: serviceDef.name, label: serviceDef.name };
-      }
-    );
+    let serviceDefsList = map(allServiceDefs, function (serviceDef) {
+      return { value: serviceDef.name, label: serviceDef.name };
+    });
 
     setServiceDefs(resourceServiceDefs);
     setServices(resourceServices);
@@ -248,9 +234,7 @@ function UserAccessLayout() {
       }
     }
 
-    navigate(`/reports/userAccess?${urlSearchParams}`, {
-      replace: true
-    });
+    navigate(`/reports/userAccess?${urlSearchParams}`);
 
     setFilterServiceDefs(serviceDefsList);
     setSearchParamsObj(searchFields);
@@ -412,17 +396,13 @@ function UserAccessLayout() {
       if (!has(Object.fromEntries(searchParams), "policyType")) {
         searchParams.set("policyType", "0");
         searchFields.policyType = "0";
-        navigate(`${location.pathname}?${searchParams}`, {
-          replace: true
-        });
+        navigate(`${location.pathname}?${searchParams}`);
         setSearchParamsObj(searchFields);
       }
       if (has(searchFields, "serviceType")) {
         let filterServiceType = searchFields.serviceType.split(",");
         searchParams.set("serviceType", uniq(filterServiceType).join(","));
-        navigate(`${location.pathname}?${searchParams}`, {
-          replace: true
-        });
+        navigate(`${location.pathname}?${searchParams}`);
       }
     }
   };

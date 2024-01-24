@@ -29,6 +29,8 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.ranger.plugin.contextenricher.RangerTagForEval;
 import org.apache.ranger.plugin.policyengine.RangerAccessRequest;
 import org.apache.ranger.plugin.policyengine.RangerAccessResource;
+import org.apache.ranger.plugin.policyengine.RangerAccessResult;
+import org.apache.ranger.plugin.policyengine.gds.GdsAccessResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +49,10 @@ public class RangerAccessRequestUtil {
 	public static final String KEY_CONTEXT_ACCESSTYPES = "ACCESSTYPES";
 	public static final String KEY_CONTEXT_IS_ANY_ACCESS = "ISANYACCESS";
 	public static final String KEY_CONTEXT_REQUEST       = "_REQUEST";
+	public static final String KEY_CONTEXT_GDS_RESULT    = "_GDS_RESULT";
 	public static final String KEY_CONTEXT_IS_REQUEST_PREPROCESSED = "ISREQUESTPREPROCESSED";
+	public static final String KEY_CONTEXT_RESOURCE_ZONE_NAMES     = "RESOURCE_ZONE_NAMES";
+	public static final String KEY_CONTEXT_ACCESS_TYPE_RESULTS = "_ACCESS_TYPE_RESULTS";
 
 	public static void setRequestTagsInContext(Map<String, Object> context, Set<RangerTagForEval> tags) {
 		if(CollectionUtils.isEmpty(tags)) {
@@ -131,7 +136,9 @@ public class RangerAccessRequestUtil {
 			ret.remove(KEY_CONTEXT_TAGS);
 			ret.remove(KEY_CONTEXT_TAG_OBJECT);
 			ret.remove(KEY_CONTEXT_RESOURCE);
+			ret.remove(KEY_CONTEXT_RESOURCE_ZONE_NAMES);
 			ret.remove(KEY_CONTEXT_REQUEST);
+			ret.remove(KEY_CONTEXT_GDS_RESULT);
 			ret.remove(KEY_CONTEXT_ACCESSTYPES);
 			ret.remove(KEY_CONTEXT_IS_ANY_ACCESS);
 			ret.remove(KEY_CONTEXT_IS_REQUEST_PREPROCESSED);
@@ -257,4 +264,101 @@ public class RangerAccessRequestUtil {
 		return ret;
 	}
 
+	public static void setGdsResultInContext(RangerAccessRequest request, GdsAccessResult result) {
+		Map<String, Object> context = request.getContext();
+
+		if (context != null) {
+			context.put(KEY_CONTEXT_GDS_RESULT, result);
+		}
+	}
+
+	public static GdsAccessResult getGdsResultFromContext(Map<String, Object> context) {
+		GdsAccessResult ret = null;
+
+		if (context != null) {
+			Object val = context.get(KEY_CONTEXT_GDS_RESULT);
+
+			if (val != null) {
+				if (val instanceof GdsAccessResult) {
+					ret = (GdsAccessResult) val;
+				} else {
+					LOG.error("getGdsResultFromContext(): expected RangerGdsAccessResult, but found " + val.getClass().getCanonicalName());
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	public static void setResourceZoneNamesInContext(RangerAccessRequest request, Set<String> zoneNames) {
+		Map<String, Object> context = request.getContext();
+
+		if (context != null) {
+			context.put(KEY_CONTEXT_RESOURCE_ZONE_NAMES, zoneNames);
+		} else {
+			LOG.error("setResourceZoneNamesInContext({}): context is null", request);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Set<String> getResourceZoneNamesFromContext(Map<String, Object> context) {
+		Set<String> ret = null;
+
+		if (context != null) {
+			Object val = context.get(KEY_CONTEXT_RESOURCE_ZONE_NAMES);
+
+			if (val instanceof Set) {
+				ret = (Set<String>) val;
+			} else {
+				if (val != null) {
+					LOG.error("getResourceZoneNamesFromContext(): expected Set<String>, but found {}", val.getClass().getCanonicalName());
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	public static String getResourceZoneNameFromContext(Map<String, Object> context) {
+		Set<String> ret = getResourceZoneNamesFromContext(context);
+
+		return ret != null && ret.size() == 1 ? ret.iterator().next() : null;
+	}
+
+	public static void setAccessTypeResults(Map<String, Object> context, Map<String, RangerAccessResult> accessTypeResults) {
+		if (context != null) {
+			if (accessTypeResults != null) {
+				context.put(KEY_CONTEXT_ACCESS_TYPE_RESULTS, accessTypeResults);
+			} else {
+				context.remove(KEY_CONTEXT_ACCESS_TYPE_RESULTS);
+			}
+		}
+	}
+
+	public static Map<String, RangerAccessResult> getAccessTypeResults(Map<String, Object> context) {
+		Map<String, RangerAccessResult> ret = null;
+
+		if (context != null) {
+			Object o = context.get(KEY_CONTEXT_ACCESS_TYPE_RESULTS);
+			if (o != null) {
+				ret = (Map<String, RangerAccessResult>)o;
+			}
+		}
+
+		return ret;
+	}
+
+	public static void setAccessTypeResult(Map<String, Object> context, String accessType, RangerAccessResult result) {
+		if (context != null) {
+			Map<String, RangerAccessResult> results = getAccessTypeResults(context);
+
+			if (results == null) {
+				results = new HashMap<>();
+
+				setAccessTypeResults(context, results);
+			}
+
+			results.putIfAbsent(accessType, result);
+		}
+	}
 }

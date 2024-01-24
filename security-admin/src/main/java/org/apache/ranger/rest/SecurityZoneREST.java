@@ -43,6 +43,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.QueryParam;
 
 import org.apache.ranger.biz.RangerPolicyAdmin;
 import org.apache.ranger.biz.RangerBizUtil;
@@ -58,7 +60,9 @@ import org.apache.ranger.db.RangerDaoManager;
 import org.apache.ranger.entity.XXService;
 import org.apache.ranger.entity.XXServiceDef;
 import org.apache.ranger.plugin.model.RangerSecurityZone;
+import org.apache.ranger.plugin.model.RangerSecurityZoneHeaderInfo;
 import org.apache.ranger.plugin.model.RangerSecurityZoneV2;
+import org.apache.ranger.plugin.model.RangerSecurityZone.SecurityZoneSummary;
 import org.apache.ranger.plugin.model.validation.RangerSecurityZoneValidator;
 import org.apache.ranger.plugin.model.validation.RangerValidator;
 import org.apache.ranger.plugin.store.PList;
@@ -107,10 +111,10 @@ public class SecurityZoneREST {
 
     @Autowired
     RangerValidatorFactory validatorFactory;
-    
+
     @Autowired
     RangerBizUtil bizUtil;
-    
+
 	@Autowired
 	ServiceREST serviceRest;
 
@@ -393,6 +397,64 @@ public class SecurityZoneREST {
         return ret;
     }
 
+    @GET
+    @Path("/zones/zone-headers/for-service/{serviceId}")
+    @Produces({ "application/json" })
+    public List<RangerSecurityZoneHeaderInfo> getSecurityZoneHeaderInfoListByServiceId(@PathParam("serviceId") Long serviceId,
+                                                                                       @DefaultValue("false") @QueryParam ("isTagService") Boolean isTagService,
+                                                                                       @Context HttpServletRequest request) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("==> SecurityZoneREST.getSecurityZoneHeaderInfoListByServiceId() serviceId:{}, isTagService:{}",serviceId,isTagService);
+        }
+
+        List<RangerSecurityZoneHeaderInfo> ret;
+
+        try {
+            ret = securityZoneStore.getSecurityZoneHeaderInfoListByServiceId(serviceId, isTagService, request);
+        } catch (WebApplicationException excp) {
+            throw excp;
+        } catch (Throwable excp) {
+            LOG.error("SecurityZoneREST.getSecurityZoneHeaderInfoListByServiceId() failed", excp);
+            throw restErrorUtil.createRESTException(excp.getMessage());
+        }
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("<== SecurityZoneREST.getSecurityZoneHeaderInfoListByServiceId():" + ret);
+        }
+
+        return ret;
+    }
+
+    @GET
+    @Path("/summary")
+    @Produces({ "application/json" })
+    public PList<SecurityZoneSummary> getZonesSummary(@Context HttpServletRequest request) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("==> getZonesSummary()");
+        }
+
+        if (!bizUtil.hasModuleAccess(RangerConstants.MODULE_SECURITY_ZONE)) {
+            throw restErrorUtil.createRESTException(STR_USER_NOT_AUTHORIZED_TO_ACCESS_ZONE, MessageEnums.OPER_NO_PERMISSION);
+        }
+
+        PList<SecurityZoneSummary>   ret    = null;
+        SearchFilter                 filter = searchUtil.getSearchFilter(request, securityZoneService.sortFields);
+        try {
+            ret = securityZoneStore.getZonesSummary(filter);
+        } catch (WebApplicationException excp) {
+            throw excp;
+        } catch (Throwable excp) {
+            LOG.error("getZonesSummary() failed", excp);
+
+            throw restErrorUtil.createRESTException(excp.getMessage());
+        }
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("<== getZonesSummary():" + ret);
+        }
+        return ret;
+    }
+
     public RangerSecurityZoneV2 createSecurityZone(RangerSecurityZoneV2 securityZone) {
         LOG.debug("==> createSecurityZone({})", securityZone);
 
@@ -418,12 +480,22 @@ public class SecurityZoneREST {
     public Boolean updateSecurityZone(Long zoneId, RangerSecurityZoneChangeRequest changeData) {
         LOG.debug("==> updateSecurityZone({}, {})", zoneId, changeData);
 
-        RangerSecurityZone       zone        = getSecurityZone(zoneId);
-        RangerSecurityZoneHelper zoneHelper  = new RangerSecurityZoneHelper(zone, bizUtil.getCurrentUserLoginId());
-        RangerSecurityZone       updatedZone = zoneHelper.updateZone(changeData);
+        Boolean ret;
 
-        RangerSecurityZone retV1 = updateSecurityZone(zoneId, updatedZone);
-        Boolean            ret   = retV1 != null;
+        try {
+            RangerSecurityZone       zone        = getSecurityZone(zoneId);
+            RangerSecurityZoneHelper zoneHelper  = new RangerSecurityZoneHelper(zone, bizUtil.getCurrentUserLoginId());
+            RangerSecurityZone       updatedZone = zoneHelper.updateZone(changeData);
+
+            RangerSecurityZone retV1 = updateSecurityZone(zoneId, updatedZone);
+            ret = retV1 != null;
+        } catch (WebApplicationException excp) {
+            throw excp;
+        } catch (Throwable excp) {
+            LOG.error("updateSecurityZone({}, {})", zoneId, changeData, excp);
+
+            throw restErrorUtil.createRESTException(excp.getMessage());
+        }
 
         LOG.debug("<== updateSecurityZone({}, {}): ret={}", zoneId, changeData, ret);
 

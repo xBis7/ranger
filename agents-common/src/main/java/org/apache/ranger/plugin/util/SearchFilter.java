@@ -38,6 +38,8 @@ public class SearchFilter {
 	public static final String IS_RECURSIVE    = "isRecursive";   // search
 	public static final String TAG_SERVICE_NAME = "tagServiceName";  // search
 	public static final String TAG_SERVICE_ID  = "tagServiceId";  // search
+	public static final String GDS_SERVICE_NAME = "gdsServiceName";  // search
+	public static final String GDS_SERVICE_ID   = "gdsServiceId";  // search
 	public static final String USER            = "user";          // search
 	public static final String GROUP           = "group";         // search
 	public static final String ROLE            = "role";         // search
@@ -59,14 +61,17 @@ public class SearchFilter {
     public static final String POLICY_LABEL_ID       = "policyLabelId";      // search, sort
     public static final String ZONE_ID               = "zoneId";      // search, sort
     public static final String ZONE_NAME             = "zoneName";      // search, sort
+    public static final String ZONE_NAME_PARTIAL     = "zoneNamePartial";      // search, sort
     public static final String NOT_ZONE_NAME         = "notZoneName";   // search
 	public static final String ROLE_ID               = "roleId";      // search, sort
 	public static final String ROLE_NAME             = "roleName";      // search, sort
 	public static final String GROUP_NAME            = "groupName";      // search, sort
 	public static final String USER_NAME             = "userName";      // search, sort
 	public static final String ROLE_NAME_PARTIAL     = "roleNamePartial";      // search
-	public static final String GROUP_NAME_PARTIAL    = "groupNamePartial";      // search
+	public static final String GROUP_NAME_PARTIAL    = "groupNamePartial";     // search
 	public static final String USER_NAME_PARTIAL     = "userNamePartial";      // search
+	public static final String SERVICE_NAME_PREFIX   = "serviceNamePrefix";    // search
+	public static final String ZONE_NAME_PREFIX      = "zoneNamePrefix";       // search
 
 	public static final String TAG_DEF_ID                = "tagDefId";            // search
 	public static final String TAG_DEF_GUID              = "tagDefGuid";          // search
@@ -96,12 +101,44 @@ public class SearchFilter {
 	public static final String SERVICE_DISPLAY_NAME_PARTIAL	= "serviceDisplayNamePartial";	// search
 	public static final String SERVICE_TYPE_DISPLAY_NAME	= "serviceTypeDisplayName";		// search, sort
 
+	public static final String DATASET_NAME             = "datasetName";          // search, sort
+	public static final String DATASET_NAME_PARTIAL     = "datasetNamePartial";   // search, sort
+	public static final String DATASET_ID               = "datasetId";            // search, sort
+	public static final String PROJECT_NAME             = "projectName";          // search, sort
+	public static final String PROJECT_NAME_PARTIAL     = "projectNamePartial";   // search, sort
+	public static final String PROJECT_ID               = "projectId";            // search, sort
+	public static final String DATA_SHARE_NAME          = "dataShareName";        // search, sort
+	public static final String DATA_SHARE_NAME_PARTIAL  = "dataShareNamePartial"; // search, sort
+	public static final String DATA_SHARE_ID            = "dataShareId";          // search, sort
+	public static final String EXCLUDE_DATASET_ID       = "excludeDatasetId";     // search
+	public static final String SHARED_RESOURCE_NAME     = "sharedResourceName";   // search, sort
+	public static final String SHARED_RESOURCE_NAME_PARTIAL = "sharedResourceNamePartial";   // search, sort
+	public static final String RESOURCE_CONTAINS        = "resourceContains";     // search
+	public static final String SHARED_RESOURCE_ID       = "sharedResourceId";     // search, sort
+	public static final String APPROVER                 = "approver";             // search, sort
+	public static final String SHARE_STATUS             = "shareStatus";          // search, sort
+	public static final String PROFILE_NAME             = "profileName";          // search
+	public static final String OWNER_NAME               = "ownerName";            // search
+	public static final String OWNER_TYPE               = "ownerType";            // search: valid-values(user, group, role)
+	public static final String DATA_SHARE_IN_DATASET_ID = "dataShareInDatasetId"; // search, sort
+	public static final String DATASET_IN_PROJECT_ID    = "datasetInProjectId";   // search, sort
+	public static final String GDS_PERMISSION    	    = "gdsPermission";        // search, sort
+	public static final String CREATE_TIME_START        = "createdTimeStart";     // search
+	public static final String CREATE_TIME_END    	    = "createdTimeEnd";       // search
+	public static final String CREATED_BY    	        = "createdBy";            // search
+	public static final String UPDATE_TIME_START        = "updatedTimeStart";     // search
+	public static final String UPDATE_TIME_END          = "updatedTimeEnd";       // search
+	public static final String IS_DISTINCT              = "isDistinct";           // search, sort
+	public static final String RETRIEVE_ALL_PAGES       = "retrieveAllPages";     // search
+	public static final String SHARED_WITH_ME           = "sharedWithMe";         // search
+
 	private Map<String, String> params;
 	private int                 startIndex;
 	private int                 maxRows    = Integer.MAX_VALUE;
 	private boolean             getCount   = true;
 	private String              sortBy;
 	private String              sortType;
+	private boolean isDistinct = true;
 
 	public SearchFilter() {
 		this((Map<String, String>) null);
@@ -228,6 +265,14 @@ public class SearchFilter {
 		this.sortType = sortType;
 	}
 
+	public boolean isDistinct() {
+		return isDistinct;
+	}
+
+	public void setDistinct(boolean isDistinct) {
+		this.isDistinct = isDistinct;
+	}
+
 	@Override
 	public boolean equals(Object object) {
 		if (object == null || !(object instanceof SearchFilter)) {
@@ -260,6 +305,7 @@ public class SearchFilter {
 		sb.append("sortBy={").append(sortBy).append("} ");
 		sb.append("sortType={").append(sortType).append("} ");
 		sb.append("startIndex={").append(startIndex).append("} ");
+		sb.append("isDistinct={").append(isDistinct).append("} ");
 		sb.append("}");
 
 		return sb;

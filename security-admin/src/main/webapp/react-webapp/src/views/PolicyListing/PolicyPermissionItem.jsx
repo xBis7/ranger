@@ -18,12 +18,22 @@
  */
 
 import React, { useMemo, useRef, useState } from "react";
-import { Table, Button, Badge, Form } from "react-bootstrap";
+import { Table, Button, Form } from "react-bootstrap";
 import { FieldArray } from "react-final-form-arrays";
 import { Col } from "react-bootstrap";
-import { Field, useFormState } from "react-final-form";
+import { Field } from "react-final-form";
 import AsyncSelect from "react-select/async";
-import { find, groupBy, isEmpty, isArray, has } from "lodash";
+import {
+  find,
+  groupBy,
+  isEmpty,
+  isArray,
+  has,
+  map,
+  filter,
+  some,
+  isEqual
+} from "lodash";
 import { toast } from "react-toastify";
 import Editable from "Components/Editable";
 import { RangerPolicyType } from "Utils/XAEnums";
@@ -49,7 +59,9 @@ export default function PolicyPermissionItem(props) {
     fetchUsersData,
     fetchGroupsData,
     fetchRolesData,
-    formValues
+    formValues,
+    changePolicyItemPermissions,
+    isMultiResources
   } = props;
   const dragItem = useRef();
   const dragOverItem = useRef();
@@ -60,8 +72,6 @@ export default function PolicyPermissionItem(props) {
   const [roleLoading, setRoleLoading] = useState(false);
   const [groupLoading, setGroupLoading] = useState(false);
   const [userLoading, setUserLoading] = useState(false);
-
-  let { values, errors, change, error, ...args } = useFormState();
 
   const permList = ["Select Roles", "Select Groups", "Select Users"];
 
@@ -106,38 +116,72 @@ export default function PolicyPermissionItem(props) {
   }, []);
 
   const getAccessTypeOptions = () => {
-    let srcOp = [];
-    for (let i = grpResourcesKeys.length - 1; i >= 0; i--) {
-      let selectedResource = `resourceName-${grpResourcesKeys[i]}`;
-      if (
-        formValues[selectedResource] &&
-        formValues[selectedResource].value !== noneOptions.value
-      ) {
-        if (
-          RangerPolicyType.RANGER_MASKING_POLICY_TYPE.value ==
-          formValues.policyType
-        ) {
-          srcOp = serviceCompDetails.dataMaskDef.accessTypes;
-        } else if (
-          RangerPolicyType.RANGER_ROW_FILTER_POLICY_TYPE.value ==
-          formValues.policyType
-        ) {
-          srcOp = serviceCompDetails.rowFilterDef.accessTypes;
-        } else {
-          srcOp = serviceCompDetails.accessTypes;
-        }
-        if (formValues[selectedResource].accessTypeRestrictions?.length > 0) {
-          let op = [];
-          for (const name of formValues[selectedResource]
-            .accessTypeRestrictions) {
-            let typeOp = find(srcOp, { name });
-            if (typeOp) {
-              op.push(typeOp);
+    let srcOp = [],
+      multiplePermissionItem = [];
+    if (
+      RangerPolicyType.RANGER_MASKING_POLICY_TYPE.value == formValues.policyType
+    ) {
+      srcOp = serviceCompDetails.dataMaskDef.accessTypes;
+    } else if (
+      RangerPolicyType.RANGER_ROW_FILTER_POLICY_TYPE.value ==
+      formValues.policyType
+    ) {
+      srcOp = serviceCompDetails.rowFilterDef.accessTypes;
+    } else {
+      srcOp = serviceCompDetails.accessTypes;
+    }
+    if (changePolicyItemPermissions) {
+      if (isMultiResources) {
+        map(formValues.additionalResources, (resourceObj) => {
+          for (let i = grpResourcesKeys.length - 1; i >= 0; i--) {
+            let selectedResource = `resourceName-${grpResourcesKeys[i]}`;
+            if (
+              resourceObj[selectedResource] &&
+              resourceObj[selectedResource].value !== noneOptions.value
+            ) {
+              if (
+                resourceObj[selectedResource].accessTypeRestrictions?.length > 0
+              ) {
+                let op = [];
+                for (const name of resourceObj[selectedResource]
+                  .accessTypeRestrictions) {
+                  let typeOp = find(srcOp, { name });
+                  if (typeOp) {
+                    op.push(typeOp);
+                  }
+                }
+                multiplePermissionItem = [...multiplePermissionItem, ...op];
+              } else {
+                multiplePermissionItem = [...srcOp];
+              }
+              break;
             }
           }
-          srcOp = op;
+        });
+        srcOp = [...new Set(multiplePermissionItem)];
+      } else {
+        for (let i = grpResourcesKeys.length - 1; i >= 0; i--) {
+          let selectedResource = `resourceName-${grpResourcesKeys[i]}`;
+          if (
+            formValues[selectedResource] &&
+            formValues[selectedResource].value !== noneOptions.value
+          ) {
+            if (
+              formValues[selectedResource].accessTypeRestrictions?.length > 0
+            ) {
+              let op = [];
+              for (const name of formValues[selectedResource]
+                .accessTypeRestrictions) {
+                let typeOp = find(srcOp, { name });
+                if (typeOp) {
+                  op.push(typeOp);
+                }
+              }
+              srcOp = op;
+            }
+            break;
+          }
         }
-        break;
       }
     }
     return srcOp.map(({ label, name: value }) => ({
@@ -308,7 +352,7 @@ export default function PolicyPermissionItem(props) {
                               <Field
                                 className="form-control"
                                 name={`${name}.roles`}
-                                render={({ input, meta }) => (
+                                render={({ input }) => (
                                   <div className="d-flex">
                                     <AsyncSelect
                                       {...input}
@@ -339,7 +383,7 @@ export default function PolicyPermissionItem(props) {
                               <Field
                                 className="form-control"
                                 name={`${name}.groups`}
-                                render={({ input, meta }) => (
+                                render={({ input }) => (
                                   <div>
                                     <AsyncSelect
                                       {...input}
@@ -370,7 +414,7 @@ export default function PolicyPermissionItem(props) {
                               <Field
                                 className="form-control"
                                 name={`${name}.users`}
-                                render={({ input, meta }) => (
+                                render={({ input }) => (
                                   <div>
                                     <AsyncSelect
                                       {...input}
@@ -409,7 +453,7 @@ export default function PolicyPermissionItem(props) {
                                       index
                                     )
                                   }
-                                  render={({ input, meta }) => (
+                                  render={({ input }) => (
                                     <div className="table-editable">
                                       <Editable
                                         {...input}
@@ -440,7 +484,7 @@ export default function PolicyPermissionItem(props) {
                                       index
                                     )
                                   }
-                                  render={({ input, meta }) => (
+                                  render={({ input }) => (
                                     <div className="table-editable">
                                       <TagBasePermissionItem
                                         options={getAccessTypeOptions()}
@@ -448,6 +492,7 @@ export default function PolicyPermissionItem(props) {
                                         formValues={formValues}
                                         dataMaskIndex={index}
                                         serviceCompDetails={serviceCompDetails}
+                                        attrName={attrName}
                                       />
                                     </div>
                                   )}
@@ -455,6 +500,7 @@ export default function PolicyPermissionItem(props) {
                               </td>
                             );
                           } else {
+                            let accessTypeOptions = getAccessTypeOptions();
                             return (
                               <td key={colName} className="align-middle">
                                 <Field
@@ -466,18 +512,39 @@ export default function PolicyPermissionItem(props) {
                                       index
                                     )
                                   }
-                                  render={({ input, meta }) => (
-                                    <div className="table-editable">
-                                      <Editable
-                                        {...input}
-                                        placement="auto"
-                                        type="checkbox"
-                                        options={getAccessTypeOptions()}
-                                        showSelectAll={true}
-                                        selectAllLabel="Select All"
-                                      />
-                                    </div>
-                                  )}
+                                  render={({ input, meta }) => {
+                                    if (
+                                      formValues[attrName][index]?.accesses &&
+                                      isArray(
+                                        formValues[attrName][index].accesses
+                                      ) &&
+                                      changePolicyItemPermissions
+                                    ) {
+                                      let accTypeVal = filter(
+                                        formValues[attrName][index].accesses,
+                                        (m) => {
+                                          if (some(accessTypeOptions, m)) {
+                                            return m;
+                                          }
+                                        }
+                                      );
+                                      if (!isEqual(input.value, accTypeVal)) {
+                                        input.onChange(accTypeVal);
+                                      }
+                                    }
+                                    return (
+                                      <div className="table-editable">
+                                        <Editable
+                                          {...input}
+                                          placement="auto"
+                                          type="checkbox"
+                                          options={accessTypeOptions}
+                                          showSelectAll={true}
+                                          selectAllLabel="Select All"
+                                        />
+                                      </div>
+                                    );
+                                  }}
                                 />
                               </td>
                             );
@@ -490,7 +557,7 @@ export default function PolicyPermissionItem(props) {
                                 <Field
                                   className="form-control"
                                   name={`${name}.dataMaskInfo`}
-                                  render={({ input, meta }) =>
+                                  render={({ input }) =>
                                     fields?.value[index]?.accesses?.tableList
                                       ?.length > 0 ? (
                                       <div className="table-editable">
@@ -537,11 +604,11 @@ export default function PolicyPermissionItem(props) {
                                       </div>
                                     ) : (
                                       <div>
-                                        <span className="editable-add-text">
+                                        <span className="editable-add-text text-secondary">
                                           Select Masking Option
                                         </span>
                                         <Button
-                                          className="mg-10 btn-mini text-secondary"
+                                          className="mg-10 mx-auto btn-mini d-block text-secondary"
                                           variant="outline-dark"
                                           size="sm"
                                           type="button"
@@ -567,7 +634,7 @@ export default function PolicyPermissionItem(props) {
                                 <Field
                                   className="form-control"
                                   name={`${name}.dataMaskInfo`}
-                                  render={({ input, meta }) => (
+                                  render={({ input }) => (
                                     <div className="table-editable">
                                       <Editable
                                         {...input}
@@ -653,7 +720,7 @@ export default function PolicyPermissionItem(props) {
                                   data-cy="delegatedAdmin"
                                   type="checkbox"
                                 >
-                                  {({ input, meta }) => (
+                                  {({ input }) => (
                                     <div>
                                       <input {...input} type="checkbox" />
                                     </div>

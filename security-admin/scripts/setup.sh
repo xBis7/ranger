@@ -42,6 +42,24 @@ get_prop(){
                 fi
 }
 
+get_prop_or_default() {
+  validateProperty=$(sed '/^\#/d' $2 | grep "^$1\s*="  | tail -n 1) # for validation
+
+  if test -z "$validateProperty" ;
+  then
+    value=$3 # default value
+  else
+    value=$(echo $validateProperty | cut -d "=" -f2-)
+  fi
+
+  if [[ $1 == *password* ]]
+  then
+    echo $value
+  else
+   echo $value | tr -d \'\"
+ fi
+}
+
 PROPFILE=${RANGER_ADMIN_CONF:-$PWD}/install.properties
 if [ ! -f "${PROPFILE}" ]; then
         echo "$PROPFILE file not found....!!"
@@ -129,6 +147,7 @@ LOGFILES=$(eval echo "$(get_prop 'LOGFILES' $PROPFILE)")
 JAVA_BIN=$(get_prop 'JAVA_BIN' $PROPFILE)
 JAVA_VERSION_REQUIRED=$(get_prop 'JAVA_VERSION_REQUIRED' $PROPFILE)
 JAVA_ORACLE=$(get_prop 'JAVA_ORACLE' $PROPFILE)
+java_opts=$(get_prop_or_default 'java_opts' $PROPFILE '')
 mysql_core_file=$(get_prop 'mysql_core_file' $PROPFILE)
 mysql_audit_file=$(get_prop 'mysql_audit_file' $PROPFILE)
 oracle_core_file=$(get_prop 'oracle_core_file' $PROPFILE)
@@ -381,6 +400,8 @@ check_java_version() {
 		log "[E] The java version must be greater than or equal to $JAVA_VERSION_REQUIRED, the current java version is $version"
 		exit 1;
 	fi
+
+	if [[ ${JAVA_OPTS} == "" ]] ;then  export JAVA_OPTS="${java_opts}" ;fi
 }
 
 sanity_check_files() {

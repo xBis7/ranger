@@ -33,6 +33,7 @@ import auditsIcon from "Images/sidebar/audits.svg";
 import zoneIcon from "Images/sidebar/zone.svg";
 import settingsIcon from "Images/sidebar/settings.svg";
 import accountIcon from "Images/sidebar/account.svg";
+import gdsIcon from "Images/sidebar/governed-data.svg";
 import Collapse from "react-bootstrap/Collapse";
 import { fetchApi } from "Utils/fetchAPI";
 import { getUserProfile, setUserProfile } from "Utils/appState";
@@ -51,6 +52,7 @@ import ResourceTagContent from "./ResourceTagContent";
 import { PathAssociateWithModule } from "../../utils/XAEnums";
 import { getServiceDef } from "../../utils/appState";
 import { SideBarBody } from "./SideBarBody";
+import { getLandingPageURl } from "../../utils/XAUtils";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -242,7 +244,7 @@ export const SideBar = () => {
         <div className="sidebar-header">
           <NavLink
             id="rangerIcon"
-            to="/policymanager/resource"
+            to={getLandingPageURl()}
             onClick={() => {
               setActive(null);
               setDrawer(false);
@@ -300,6 +302,29 @@ export const SideBar = () => {
               >
                 <img src={tagsIcon} />
                 <span>Tag Policies</span>
+              </Button>
+            </li>
+          )}
+
+          {hasAccessToTab("Governed Data Sharing") && (
+            <li
+              className={
+                isActive !== null && isActive === "gdsCollapse"
+                  ? "selected"
+                  : undefined
+              }
+            >
+              <Button
+                id="gdsButton"
+                className={activeClass("GDS")}
+                onClick={() => {
+                  setActive("gdsCollapse");
+                  setAccountDrawer(false);
+                  setDrawer(true);
+                }}
+              >
+                <img src={gdsIcon} />
+                <span>Governed Data Sharing</span>
               </Button>
             </li>
           )}
