@@ -220,6 +220,9 @@ public class TestXUserMgr {
 	ServiceDBStore svcStore;
 
 	@Mock
+	GdsDBStore gdsStore;
+
+	@Mock
 	XGroupGroupService xGroupGroupService;
 
 	@Mock
@@ -581,6 +584,7 @@ public class TestXUserMgr {
 		policy.setPolicyItems(policyItems);
 		policy.setResources(policyResource);
 		policy.setPolicyLabels(policyLabels);
+		policy.setServiceType("hdfs");
 		return policy;
 	}
 

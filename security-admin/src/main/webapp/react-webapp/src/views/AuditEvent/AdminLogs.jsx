@@ -63,7 +63,7 @@ function Admin() {
 
   const updateSessionId = (id) => {
     navigate(`/reports/audit/admin?sessionId=${id}`);
-    setSearchParams({ sessionId: id });
+    setSearchParams({ sessionId: id }, { replace: true });
     setContentLoader(true);
   };
 
@@ -79,7 +79,7 @@ function Admin() {
       fetchSearchFilterParams("admin", searchParams, searchFilterOptions);
 
     // Updating the states for search params, search filter, default search filter and localStorage
-    setSearchParams(searchParam);
+    setSearchParams(searchParam, { replace: true });
     if (
       JSON.stringify(searchFilterParams) !== JSON.stringify(searchFilterParam)
     ) {
@@ -220,6 +220,42 @@ function Admin() {
                   Role {action}d <strong>{objectname}</strong>
                 </span>
               );
+            else if (classtype == ClassTypes.CLASS_TYPE_RANGER_DATASET.value)
+              operation = (
+                <span>
+                  Dataset {action}d <strong>{objectname}</strong>
+                </span>
+              );
+            else if (classtype == ClassTypes.CLASS_TYPE_RANGER_PROJECT.value)
+              operation = (
+                <span>
+                  Project {action}d <strong>{objectname}</strong>
+                </span>
+              );
+            else if (classtype == ClassTypes.CLASS_TYPE_RANGER_DATA_SHARE.value)
+              operation = (
+                <span>
+                  Data Share {action}d <strong>{objectname}</strong>
+                </span>
+              );
+            else if (classtype == ClassTypes.CLASS_TYPE_RANGER_SHARED_RESOURCE.value)
+              operation = (
+                <span>
+                  Shared Resource {action}d <strong>{objectname}</strong>
+                </span>
+              );
+            else if (classtype == ClassTypes.CLASS_TYPE_RANGER_DATA_SHARE_IN_DATASET.value)
+              operation = (
+                <span>
+                  DataShare in Dataset {action}d <strong>{objectname}</strong>
+                </span>
+              );
+            else if (classtype == ClassTypes.CLASS_TYPE_RANGER_DATASET_IN_PROJECT.value)
+              operation = (
+                <span>
+                  Dataset in Project {action}d <strong>{objectname}</strong>
+                </span>
+              );
             return <div className="text-truncate">{operation}</div>;
           }
         },
@@ -356,7 +392,7 @@ function Admin() {
     );
 
     setSearchFilterParams(searchFilterParam);
-    setSearchParams(searchParam);
+    setSearchParams(searchParam, { replace: true });
     localStorage.setItem("admin", JSON.stringify(searchParam));
 
     if (typeof resetPage?.page === "function") {
@@ -398,6 +434,12 @@ function Admin() {
           { value: "1056", label: "Ranger Security Zone" },
           { value: "1030", label: "Ranger Service" },
           { value: "1003", label: "Ranger User" },
+          { value: "1062", label: "Ranger Dataset" },
+          { value: "1063", label: "Ranger Project" },
+          { value: "1064", label: "Ranger Data Share" },
+          { value: "1065", label: "Ranger Shared Resource" },
+          { value: "1066", label: "Ranger Data Share in Dataset" },
+          { value: "1067", label: "Ranger Dataset in Project" },
           { value: "2", label: "User Profile" }
         ];
       }

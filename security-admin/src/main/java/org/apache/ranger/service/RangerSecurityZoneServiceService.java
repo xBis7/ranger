@@ -33,6 +33,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ranger.authorization.hadoop.config.RangerAdminConfig;
 import org.apache.ranger.authorization.utils.StringUtil;
+import org.apache.ranger.biz.GdsDBStore;
 import org.apache.ranger.biz.ServiceDBStore;
 import org.apache.ranger.common.AppConstants;
 import org.apache.ranger.common.view.VTrxLogAttr;
@@ -65,6 +66,9 @@ public class RangerSecurityZoneServiceService extends RangerSecurityZoneServiceB
 	@Autowired
 	ServiceDBStore serviceDBStore;
 
+    @Autowired
+    GdsDBStore gdsStore;
+
     boolean compressJsonData = false;
 
     private static final Logger logger = LoggerFactory.getLogger(RangerSecurityZoneServiceService.class);
@@ -82,6 +86,8 @@ public class RangerSecurityZoneServiceService extends RangerSecurityZoneServiceB
 		trxLogAttrs.put("adminUserGroups", new VTrxLogAttr("adminUserGroups", "Zone Admin User Groups", false));
 		trxLogAttrs.put("auditUsers", new VTrxLogAttr("auditUsers", "Zone Audit Users", false));
 		trxLogAttrs.put("auditUserGroups", new VTrxLogAttr("auditUserGroups", "Zone Audit User Groups", false));
+		trxLogAttrs.put("adminRoles", new VTrxLogAttr("adminRoles", "Zone Admin Roles", false));
+		trxLogAttrs.put("auditRoles", new VTrxLogAttr("auditRoles", "Zone Audit Roles", false));
 		trxLogAttrs.put("description", new VTrxLogAttr("description", "Zone Description", false));
                 trxLogAttrs.put("tagServices", new VTrxLogAttr("tagServices", "Zone Tag Services", false));
 	}
@@ -98,7 +104,7 @@ public class RangerSecurityZoneServiceService extends RangerSecurityZoneServiceB
 
         RangerAdminConfig config = RangerAdminConfig.getInstance();
 
-        compressJsonData = config.getBoolean("ranger.admin.store.security.zone.compress.json_data", false);
+        compressJsonData = config.getBoolean("ranger.admin.store.security.zone.compress.json_data", compressJsonData);
 
         logger.info("ranger.admin.store.security.zone.compress.json_data={}", compressJsonData);
 
@@ -128,28 +134,40 @@ public class RangerSecurityZoneServiceService extends RangerSecurityZoneServiceB
 
         if (StringUtils.isNotEmpty(json) && compressJsonData) {
             try {
-                json = StringUtil.compressString(json);
+                ret.setJsonData(null);
+                ret.setGzJsonData(StringUtil.gzipCompress(json));
             } catch (IOException excp) {
                 logger.error("mapViewToEntityBean(): json compression failed (length={}). Will save uncompressed json", json.length(), excp);
-            }
-        }
 
-        ret.setJsonData(json);
+                ret.setJsonData(json);
+                ret.setGzJsonData(null);
+            }
+        } else {
+            ret.setJsonData(json);
+            ret.setGzJsonData(null);
+        }
 
         return ret;
     }
     @Override
     protected RangerSecurityZone mapEntityToViewBean(RangerSecurityZone securityZone, XXSecurityZone xxSecurityZone) {
-        RangerSecurityZone ret  = super.mapEntityToViewBean(securityZone, xxSecurityZone);
-        String             json = xxSecurityZone.getJsonData();
+        RangerSecurityZone ret    = super.mapEntityToViewBean(securityZone, xxSecurityZone);
+        byte[]             gzJson = xxSecurityZone.getGzJsonData();
+        String             json;
+
+        if (gzJson != null) {
+            try {
+                json = StringUtil.gzipDecompress(gzJson);
+            } catch (IOException excp) {
+                json = xxSecurityZone.getJsonData();
+
+                logger.error("mapEntityToViewBean(): decompression of x_security_zone.gz_jsonData failed (length={}). Will use contents of x_security_zone.jsonData (length={})", gzJson.length, (json != null ? json.length() : 0), excp);
+            }
+        } else {
+            json = xxSecurityZone.getJsonData();
+        }
 
         if (StringUtils.isNotEmpty(json)) {
-            try {
-                json = StringUtil.decompressString(json);
-            } catch (IOException excp) {
-                logger.error("mapEntityToViewBean(): json decompression failed (length={}). Will treat as uncompressed json", json.length(), excp);
-            }
-
             RangerSecurityZone zoneFromJsonData = gsonBuilder.fromJson(json, RangerSecurityZone.class);
 
             if (zoneFromJsonData == null) {
@@ -213,6 +231,8 @@ public class RangerSecurityZoneServiceService extends RangerSecurityZoneServiceB
 
             serviceDBStore.deleteZonePolicies(deletedTagServiceNames, ret.getId());
 
+            gdsStore.deleteAllGdsObjectsForServicesInSecurityZone(deletedServiceNames, ret.getId());
+
             oldServiceNames.addAll(updatedServiceNames);
             updateServiceInfos(oldServiceNames);
         } catch (Exception exception) {
@@ -235,6 +255,7 @@ public class RangerSecurityZoneServiceService extends RangerSecurityZoneServiceB
 
         try {
             serviceDBStore.deleteZonePolicies(allServiceNames, id);
+            gdsStore.deleteAllGdsObjectsForSecurityZone(id);
             updateServiceInfos(allServiceNames);
         } catch (Exception exception) {
             logger.error("preDelete processing failed for security-zone:[" + viewObject + "]", exception);

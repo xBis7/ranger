@@ -74,6 +74,7 @@ import org.apache.ranger.db.XXTrxLogDao;
 import org.apache.ranger.entity.XXTagChangeLog;
 import org.apache.ranger.plugin.model.RangerSecurityZone;
 import org.apache.ranger.plugin.util.RangerCommonConstants;
+import org.apache.ranger.plugin.util.ServiceDefUtil;
 import org.apache.ranger.plugin.util.RangerPurgeResult;
 import org.apache.ranger.plugin.util.ServiceTags;
 import org.apache.ranger.plugin.model.validation.RangerServiceDefValidator;
@@ -219,6 +220,8 @@ import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import static org.apache.ranger.db.XXGlobalStateDao.RANGER_GLOBAL_STATE_NAME_GDS;
+
 @Component
 public class ServiceDBStore extends AbstractServiceStore {
 	private static final Logger LOG = LoggerFactory.getLogger(ServiceDBStore.class);
@@ -244,6 +247,7 @@ public class ServiceDBStore extends AbstractServiceStore {
     private static final String AMBARI_SERVICE_CHECK_USER = "ambari.service.check.user";
 	public static final String SERVICE_ADMIN_USERS     = "service.admin.users";
 	public static final String SERVICE_ADMIN_GROUPS    = "service.admin.groups";
+	public static final String GDS_SERVICE_NAME        = "_gds";
 
 	private static boolean isRolesDownloadedByService = false;
 
@@ -2450,22 +2454,39 @@ public class ServiceDBStore extends AbstractServiceStore {
 	}
 
 	private List<RangerPolicy> searchRangerTagPoliciesOnBasisOfServiceName(List<RangerPolicy> allExceptTagPolicies) throws Exception {
-		Set<String> rangerServiceNames = new HashSet<String>();
+		List<RangerPolicy> ret          = new ArrayList<>();
+		Set<String>        serviceNames = new HashSet<>();
+		Map<String, Long>  tagServices  = new HashMap<>();
+
 		for(RangerPolicy pol : allExceptTagPolicies) {
-			rangerServiceNames.add(pol.getService());
+			serviceNames.add(pol.getService());
 		}
-		List<RangerPolicy> retPolicies = new ArrayList<RangerPolicy>();
-		for(String eachRangerService : rangerServiceNames) {
-			List<RangerPolicy> policies = new ArrayList<RangerPolicy>();
-				RangerService rangerServiceObj = getServiceByName(eachRangerService);
-				RangerService rangerTagService = getServiceByName(rangerServiceObj.getTagService());
-				if(rangerTagService != null) {
-					ServicePolicies servicePolicies = RangerServicePoliciesCache.getInstance().getServicePolicies(rangerTagService.getName(),rangerTagService.getId(), -1L, true, this);
-					policies = servicePolicies != null ? servicePolicies.getPolicies() : null;
-					retPolicies.addAll(policies);
+
+		for(String serviceName : serviceNames) {
+			RangerService service = getServiceByName(serviceName);
+
+			if (StringUtils.isNotBlank(service.getTagService())) {
+				RangerService tagService = getServiceByName(service.getTagService());
+
+				if (tagService != null) {
+					tagServices.put(tagService.getName(), tagService.getId());
 				}
 			}
-		return retPolicies;
+		}
+
+		for (Map.Entry<String, Long> entry : tagServices.entrySet()) {
+			String tagServiceName = entry.getKey();
+			Long   tagServiceId   = entry.getValue();
+
+			ServicePolicies    tagServicePolicies = RangerServicePoliciesCache.getInstance().getServicePolicies(tagServiceName, tagServiceId, -1L, true, this);
+			List<RangerPolicy> policies           = tagServicePolicies != null ? tagServicePolicies.getPolicies() : null;
+
+			if (policies != null) {
+				ret.addAll(policies);
+			}
+		}
+
+		return ret;
 	}
 
 	@Override
@@ -2905,36 +2926,22 @@ public class ServiceDBStore extends AbstractServiceStore {
 				ret = ServicePolicies.copyHeader(ret);
 				ret.setTagPolicies(null);
 			} else {
-				boolean isTagServiceActive = true;
-
-				if (ret.getTagPolicies() != null) {
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("Checking if tag-service:[" + ret.getTagPolicies().getServiceName() + "] is disabled");
-					}
-					String tagServiceName = ret.getTagPolicies().getServiceName();
-
-					if (StringUtils.isNotEmpty(tagServiceName)) {
-						XXService tagService = daoMgr.getXXService().findByName(tagServiceName);
-						if (tagService == null || !tagService.getIsenabled()) {
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("tag-service:[" + tagServiceName + "] is disabled");
-							}
-							isTagServiceActive = false;
-						}
-					} else {
-						isTagServiceActive = false;
-					}
-				} else {
-					isTagServiceActive = false;
-				}
+				String  tagServiceName     = ret.getTagPolicies() != null ? ret.getTagPolicies().getServiceName() : null;
+				boolean isTagServiceActive = isServiceActive(tagServiceName);
 
 				if (!isTagServiceActive) {
 					ServicePolicies copy = ServicePolicies.copyHeader(ret);
-					copy.setTagPolicies(null);
-					List<RangerPolicy> copyPolicies = ret.getPolicies() != null ? new ArrayList<>(ret.getPolicies()) : null;
+
+					if (!isTagServiceActive) {
+						copy.setTagPolicies(null);
+					}
+
+					List<RangerPolicy>      copyPolicies     = ret.getPolicies() != null ? new ArrayList<>(ret.getPolicies()) : null;
 					List<RangerPolicyDelta> copyPolicyDeltas = ret.getPolicyDeltas() != null ? new ArrayList<>(ret.getPolicyDeltas()) : null;
+
 					copy.setPolicies(copyPolicies);
 					copy.setPolicyDeltas(copyPolicyDeltas);
+
 					ret = copy;
 				}
 			}
@@ -3032,8 +3039,8 @@ public class ServiceDBStore extends AbstractServiceStore {
 
 		String auditMode = getAuditMode(serviceType, serviceName);
 
-		XXService tagServiceDbObj = null;
-		RangerServiceDef tagServiceDef = null;
+		XXService            tagServiceDbObj = null;
+		RangerServiceDef     tagServiceDef = null;
 		XXServiceVersionInfo tagServiceVersionInfoDbObj= null;
 
 		if (serviceDbObj.getTagService() != null) {
@@ -3046,6 +3053,8 @@ public class ServiceDBStore extends AbstractServiceStore {
 			if (tagServiceDef == null) {
 				throw new Exception("service-def does not exist. id=" + tagServiceDbObj.getType());
 			}
+
+			ServiceDefUtil.normalizeAccessTypeDefs(tagServiceDef, serviceType);
 
 			tagServiceVersionInfoDbObj = daoMgr.getXXServiceVersionInfo().findByServiceId(serviceDbObj.getTagService());
 
@@ -3069,7 +3078,6 @@ public class ServiceDBStore extends AbstractServiceStore {
 			ServicePolicies.TagPolicies tagPolicies = null;
 
 			if (tagServiceDbObj != null) {
-
 				tagPolicies = new ServicePolicies.TagPolicies();
 
 				tagPolicies.setServiceId(tagServiceDbObj.getId());
@@ -3080,6 +3088,7 @@ public class ServiceDBStore extends AbstractServiceStore {
 				tagPolicies.setServiceDef(tagServiceDef);
 				tagPolicies.setAuditMode(auditMode);
 			}
+
 			List<RangerPolicy> policies = getServicePoliciesFromDb(serviceDbObj);
 
 			ret = new ServicePolicies();
@@ -3276,9 +3285,11 @@ public class ServiceDBStore extends AbstractServiceStore {
 		if (lastKnownVersion != -1L) {
 
 			List<RangerPolicyDelta> resourcePolicyDeltas;
-			List<RangerPolicyDelta> tagPolicyDeltas = null;
-			Long                    retrievedPolicyVersion = null;
+			List<RangerPolicyDelta> tagPolicyDeltas           = null;
+			List<RangerPolicyDelta> gdsPolicyDeltas           = null;
+			Long                    retrievedPolicyVersion    = null;
 			Long                    retrievedTagPolicyVersion = null;
+			Long                    retrievedGdsPolicyVersion = null;
 
 			String componentServiceType = serviceDef.getName();
 
@@ -3297,7 +3308,6 @@ public class ServiceDBStore extends AbstractServiceStore {
 				if (isValid && tagService != null) {
 					Long id = resourcePolicyDeltas.get(0).getId();
 					tagPolicyDeltas = daoMgr.getXXPolicyChangeLog().findGreaterThan(id, maxNeededVersion, tagService.getId());
-
 
 					if (CollectionUtils.isNotEmpty(tagPolicyDeltas)) {
 						String tagServiceType = tagServiceDef.getName();
@@ -3630,7 +3640,7 @@ public class ServiceDBStore extends AbstractServiceStore {
 		updatePolicyVersion(service, policyDeltaType, policy, updateServiceInfoRoleVersion);
 	}
 
-	public enum VERSION_TYPE { POLICY_VERSION, TAG_VERSION, ROLE_VERSION }
+	public enum VERSION_TYPE { POLICY_VERSION, TAG_VERSION, ROLE_VERSION, GDS_VERSION }
 
 	private void updatePolicyVersion(RangerService service, Integer policyDeltaType, RangerPolicy policy, boolean updateServiceInfoRoleVersion) throws Exception {
 		if(service == null || service.getId() == null) {
@@ -3649,25 +3659,24 @@ public class ServiceDBStore extends AbstractServiceStore {
 		final RangerDaoManager daoManager  = daoMgr;
 		final Long 			   serviceId   = serviceDbObj.getId();
 
-		// if this is a tag service, update all services that refer to this tag service
-		// so that next policy-download from plugins will get updated tag policies
+		// if this is a tag/gds service, update all services that refer to this service
+		// so that next policy-download from plugins will get updated tag/gds policies
 		boolean isTagService = serviceDbObj.getType() == EmbeddedServiceDefsUtil.instance().getTagServiceDefId();
-		if(isTagService) {
-			List<XXService> referringServices = serviceDao.findByTagServiceId(serviceId);
 
-			if(CollectionUtils.isNotEmpty(referringServices)) {
-				for(XXService referringService : referringServices) {
-					final Long 		    referringServiceId 	  = referringService.getId();
-					final VERSION_TYPE  tagServiceversionType = VERSION_TYPE.POLICY_VERSION;
+		if (isTagService) {
+			List<Long> referringServiceIds = serviceDao.findIdsByTagServiceId(serviceId);
 
-					Runnable tagServiceVersionUpdater = new ServiceVersionUpdater(daoManager, referringServiceId, tagServiceversionType, policy != null ? policy.getZoneName() : null, policyDeltaType, policy);
-					transactionSynchronizationAdapter.executeOnTransactionCommit(tagServiceVersionUpdater);
+			for (Long referringServiceId : referringServiceIds) {
+				Runnable policyVersionUpdater = new ServiceVersionUpdater(daoManager, referringServiceId, VERSION_TYPE.POLICY_VERSION, policy != null ? policy.getZoneName() : null, policyDeltaType, policy);
+				transactionSynchronizationAdapter.executeOnTransactionCommit(policyVersionUpdater);
 
+				if (updateServiceInfoRoleVersion) {
 					Runnable roleVersionUpdater = new ServiceVersionUpdater(daoManager, referringServiceId, VERSION_TYPE.ROLE_VERSION, policy != null ? policy.getZoneName() : null, policyDeltaType, policy);
 					transactionSynchronizationAdapter.executeOnTransactionCommit(roleVersionUpdater);
 				}
 			}
 		}
+
 		final VERSION_TYPE     versionType = VERSION_TYPE.POLICY_VERSION;
 
 		Runnable serviceVersionUpdater = new ServiceVersionUpdater(daoManager, serviceId, versionType, policy != null ? policy.getZoneName() : null, policyDeltaType, policy);
@@ -3717,23 +3726,34 @@ public class ServiceDBStore extends AbstractServiceStore {
 					LOG.error("No Global state DAO. Cannot execute this object:[" + serviceVersionUpdater + "]");
 					return;
 				}
+			} else if (versionType == VERSION_TYPE.GDS_VERSION) {
+				nextVersion = daoMgr.getXXGlobalState().getAppDataVersion(RANGER_GLOBAL_STATE_NAME_GDS);
+
+				if (nextVersion == null) {
+					nextVersion = 1L;
+				}
+
+				serviceVersionInfoDbObj.setGdsVersion(nextVersion);
+				serviceVersionInfoDbObj.setGdsUpdateTime(now);
 			} else {
 				LOG.error("Unknown VERSION_TYPE:" + versionType + ". Cannot execute this object:[" + serviceVersionUpdater + "]");
 				return;
 			}
+
 			serviceVersionUpdater.version = nextVersion;
 			serviceVersionInfoDao.update(serviceVersionInfoDbObj);
-
 		} else {
 			if (service != null) {
 				serviceVersionInfoDbObj = new XXServiceVersionInfo();
 				serviceVersionInfoDbObj.setServiceId(service.getId());
 				serviceVersionInfoDbObj.setPolicyVersion(nextVersion);
-				serviceVersionInfoDbObj.setPolicyUpdateTime(new Date());
+				serviceVersionInfoDbObj.setPolicyUpdateTime(now);
 				serviceVersionInfoDbObj.setTagVersion(nextVersion);
-				serviceVersionInfoDbObj.setTagUpdateTime(new Date());
+				serviceVersionInfoDbObj.setTagUpdateTime(now);
 				serviceVersionInfoDbObj.setRoleVersion(nextVersion);
-				serviceVersionInfoDbObj.setRoleUpdateTime(new Date());
+				serviceVersionInfoDbObj.setRoleUpdateTime(now);
+				serviceVersionInfoDbObj.setGdsVersion(nextVersion);
+				serviceVersionInfoDbObj.setGdsUpdateTime(now);
 
 				serviceVersionUpdater.version = nextVersion;
 				serviceVersionInfoDao.create(serviceVersionInfoDbObj);
@@ -6225,7 +6245,7 @@ public class ServiceDBStore extends AbstractServiceStore {
 	private ServicePolicies filterServicePolicies(ServicePolicies servicePolicies) {
 		ServicePolicies ret = null;
 		boolean containsDisabledResourcePolicies = false;
-		boolean containsDisabledTagPolicies = false;
+		boolean containsDisabledTagPolicies      = false;
 
 		if (servicePolicies != null) {
 			List<RangerPolicy> policies = null;
@@ -6451,5 +6471,21 @@ public class ServiceDBStore extends AbstractServiceStore {
 			}
 		}
 		return roleNames;
+	}
+
+	private boolean isServiceActive(String serviceName) {
+		boolean ret = false;
+
+		if (StringUtils.isNotBlank(serviceName)) {
+			XXService service = daoMgr.getXXService().findByName(serviceName);
+
+			ret = (service != null && service.getIsenabled());
+
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("isServiceActive(" + serviceName + "): " + ret);
+			}
+		}
+
+		return ret;
 	}
 }

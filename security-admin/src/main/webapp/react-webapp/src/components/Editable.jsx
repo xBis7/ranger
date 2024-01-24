@@ -57,7 +57,7 @@ const CheckboxComp = (props) => {
     setVal(val);
   };
 
-  const handleAllChekced = (e) => {
+  const handleAllChecked = (e) => {
     let val = [];
     if (e.target.checked) {
       val = [...options];
@@ -92,7 +92,7 @@ const CheckboxComp = (props) => {
             checked={isAllChecked()}
             type="checkbox"
             label={selectAllLabel}
-            onChange={(e) => handleAllChekced(e)}
+            onChange={(e) => handleAllChecked(e)}
           />
         </Form.Group>
       )}
@@ -126,7 +126,7 @@ const RadioBtnComp = (props) => {
   ));
 };
 
-const InputboxComp = (props) => {
+const InputBoxComp = (props) => {
   const { value = "", valRef } = props;
   const [selectedInputVal, setInputVal] = useState(value);
   const handleChange = (e) => {
@@ -249,7 +249,7 @@ const CustomCondition = (props) => {
                           position="right"
                           message={
                             <p className="pd-10">
-                              {RegexMessage.MESSAGE.policyconditioninfoicon}
+                              {RegexMessage.MESSAGE.policyConditionInfoIcon}
                             </p>
                           }
                         />
@@ -312,7 +312,7 @@ const CustomCondition = (props) => {
   );
 };
 
-const innitialState = (props) => {
+const initialState = (props) => {
   const { type, selectProps, value } = props;
   let val = value;
   if (!val) {
@@ -359,7 +359,8 @@ const Editable = (props) => {
     onChange,
     options = [],
     conditionDefVal,
-    servicedefName
+    servicedefName,
+    isGDS
   } = props;
 
   const initialLoad = useRef(true);
@@ -369,7 +370,7 @@ const Editable = (props) => {
     state: false,
     errorMSG: ""
   });
-  const [state, dispatch] = useReducer(reducer, props, innitialState);
+  const [state, dispatch] = useReducer(reducer, props, initialState);
   const { show, value, target } = state;
   let isListenerAttached = false;
 
@@ -593,28 +594,32 @@ const Editable = (props) => {
           val = (
             <h6>
               {policyConditionDisplayValue()}
-              <Button
-                className="mg-10 mx-auto d-block btn-mini"
-                variant="outline-dark"
-                size="sm"
-                type="button"
-              >
-                <i className="fa-fw fa fa-pencil"></i>
-              </Button>
+              {!isGDS && (
+                <Button
+                  className="mg-10 mx-auto d-block btn-mini"
+                  variant="outline-dark"
+                  size="sm"
+                  type="button"
+                >
+                  <i className="fa-fw fa fa-pencil"></i>
+                </Button>
+              )}
             </h6>
           );
         } else {
           val = (
             <div className="text-center">
               <span className="editable-add-text">Add Conditions</span>
-              <Button
-                className="mg-10 mx-auto d-block btn-mini"
-                variant="outline-dark"
-                size="sm"
-                type="button"
-              >
-                <i className="fa-fw fa fa-plus"></i>
-              </Button>
+              {!isGDS && (
+                <Button
+                  className="mg-10 mx-auto d-block btn-mini"
+                  variant="outline-dark"
+                  size="sm"
+                  type="button"
+                >
+                  <i className="fa-fw fa fa-plus"></i>
+                </Button>
+              )}
             </div>
           );
         }
@@ -714,7 +719,7 @@ const Editable = (props) => {
         ) : type === TYPE_RADIO ? (
           <RadioBtnComp value={value} options={options} valRef={selectValRef} />
         ) : type === TYPE_INPUT ? (
-          <InputboxComp value={value} valRef={selectValRef} />
+          <InputBoxComp value={value} valRef={selectValRef} />
         ) : type === TYPE_CUSTOM ? (
           <CustomCondition
             value={value}

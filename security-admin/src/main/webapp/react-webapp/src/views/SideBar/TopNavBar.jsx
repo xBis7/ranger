@@ -161,28 +161,12 @@ export const TopNavBar = (props) => {
   };
 
   const deleteService = async (serviceId) => {
-    let localStorageZoneDetails = localStorage.getItem("zoneDetails");
-    let zonesResp = [];
     hideDeleteModal();
     try {
       await fetchApi({
         url: `plugins/services/${serviceId}`,
         method: "delete"
       });
-      if (
-        localStorageZoneDetails !== undefined &&
-        localStorageZoneDetails !== null
-      ) {
-        zonesResp = await fetchApi({
-          url: `public/v2/api/zones/${
-            JSON.parse(localStorageZoneDetails)?.value
-          }/service-headers`
-        });
-
-        if (isEmpty(zonesResp?.data)) {
-          localStorage.removeItem("zoneDetails");
-        }
-      }
       toast.success("Successfully deleted the service");
       navigate(
         serviceDefData?.name === "tag"
@@ -219,6 +203,7 @@ export const TopNavBar = (props) => {
           value={!policyLoader ? getCurrentService(serviceData) : ""}
           menuPlacement="auto"
           placeholder="Select Service Name"
+          hideSelectedOptions
         />
         {!isKMSRole && (
           <React.Fragment>
@@ -235,14 +220,21 @@ export const TopNavBar = (props) => {
               menuPlacement="auto"
               placeholder="Select Zone Name"
               isClearable
+              hideSelectedOptions
             />
           </React.Fragment>
         )}
       </div>
       <div
-        className="collapse navbar-collapse justify-content-end"
+        className="collapse navbar-collapse justify-content-end gap-half"
         id="navbarText"
       >
+        <span className="navbar-text last-response-time">
+          <strong>Last Response Time</strong>
+          <br />
+          {moment(moment()).format("MM/DD/YYYY hh:mm:ss A")}
+        </span>
+        {(!isUserRole || isAdminRole) && <span className="pipe"></span>}
         {(!isUserRole || isAdminRole) && (
           <DropdownButton
             id="dropdown-item-button"
@@ -270,7 +262,7 @@ export const TopNavBar = (props) => {
             {isAdminRole && (
               <Dropdown.ItemText>
                 <Link
-                  to={`/service/${serviceDefData.id}/edit/${serviceData?.id}`}
+                  to={`/service/${serviceDefData?.id}/edit/${serviceData?.id}`}
                   onClick={(e) => policyLoader && e.preventDefault()}
                   state={allServicesData[0]?.id}
                   disabled={policyLoader ? true : false}
@@ -302,13 +294,6 @@ export const TopNavBar = (props) => {
             )}
           </DropdownButton>
         )}
-
-        {(!isUserRole || isAdminRole) && <span className="pipe"></span>}
-        <span className="navbar-text last-response-time">
-          <strong>Last Response Time</strong>
-          <br />
-          {moment(moment()).format("MM/DD/YYYY hh:mm:ss A")}
-        </span>
       </div>
       <Modal
         show={showView === serviceData?.id}
@@ -333,8 +318,8 @@ export const TopNavBar = (props) => {
       <Modal show={showDelete} onHide={hideDeleteModal}>
         <Modal.Header closeButton>
           <span className="text-word-break">
-            Are you sure want to delete service&nbsp;"
-            <b>{`${serviceData?.displayName}`}</b>" ?
+            Are you sure want to delete service&nbsp;&quot;
+            <b>{`${serviceData?.displayName}`}</b>&quot; ?
           </span>
         </Modal.Header>
         <Modal.Footer>

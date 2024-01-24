@@ -24,7 +24,7 @@ import XATableLayout from "Components/XATableLayout";
 import { AuditFilterEntries } from "Components/CommonComponents";
 import moment from "moment-timezone";
 import dateFormat from "dateformat";
-import { sortBy, filter } from "lodash";
+import { sortBy, filter, isEmpty } from "lodash";
 import StructuredFilter from "../../components/structured-filter/react-typeahead/tokenizer";
 import { fetchApi } from "Utils/fetchAPI";
 import {
@@ -62,7 +62,7 @@ function Plugins() {
       fetchSearchFilterParams("agent", searchParams, searchFilterOptions);
 
     // Updating the states for search params, search filter, default search filter and localStorage
-    setSearchParams(searchParam);
+    setSearchParams(searchParam, { replace: true });
     if (
       JSON.stringify(searchFilterParams) !== JSON.stringify(searchFilterParam)
     ) {
@@ -168,13 +168,15 @@ function Plugins() {
         Header: "Plugin ID",
         accessor: "agentId",
         Cell: (rawValue) => {
-          return (
+          return !isEmpty(rawValue.value) ? (
             <span
               className="text-truncate text-center d-block"
               title={rawValue.value}
             >
               {rawValue.value}
             </span>
+          ) : (
+            <span className="text-center d-block">--</span>
           );
         },
         disableSortBy: true
@@ -198,13 +200,15 @@ function Plugins() {
         Header: "Cluster Name",
         accessor: "clusterName",
         Cell: (rawValue) => {
-          return (
+          return !isEmpty(rawValue.value) ? (
             <span
               className="text-truncate text-center d-block"
               title={rawValue.value}
             >
               {rawValue.value}
             </span>
+          ) : (
+            <span className="text-center d-block">--</span>
           );
         },
         width: 100,
@@ -248,7 +252,7 @@ function Plugins() {
     );
 
     setSearchFilterParams(searchFilterParam);
-    setSearchParams(searchParam);
+    setSearchParams(searchParam, { replace: true });
     localStorage.setItem("agent", JSON.stringify(searchParam));
 
     if (typeof resetPage?.page === "function") {

@@ -87,29 +87,59 @@
             ]
           },
           "policies": [
-            { "id": 101, "name": "SENSITIVE", "isEnabled": true, "isAuditEnabled": true, "policyType": 0,
+            { "id": 1, "name": "1: access: SENSITIVE", "isEnabled": true, "isAuditEnabled": true, "policyType": 0,
               "resources": { "tag": { "values": [ "SENSITIVE" ], "isRecursive": false } },
               "policyItems": [
                 {"accesses": [{"type": "hive:select", "isAllowed": true}], "users": [ "test-user"] }
               ]
             },
-            { "id": 102, "name": "mask: SENSITIVE(level=normal)", "isEnabled": true, "isAuditEnabled": true, "policyType": 1,
+            { "id": 2, "name": "2: access: ORDER", "isEnabled": true, "isAuditEnabled": true, "policyType": 0,
+              "resources": { "tag": { "values": [ "ORDER" ], "isRecursive": false } },
+              "policyItems": [
+                {"accesses": [{"type": "hive:create", "isAllowed": true}], "users": [ "dba"] }
+              ]
+            },
+            { "id": 3, "name": "2: access: CUSTOMER", "isEnabled": true, "isAuditEnabled": true, "policyType": 0,
+              "resources": { "tag": { "values": [ "CUSTOMER" ], "isRecursive": false } },
+              "policyItems": [
+                {"accesses": [{"type": "hive:select", "isAllowed": true}], "users": [ "test-user"] }
+              ]
+            },
+            { "id": 4, "name": "3: access: ADDRESS", "isEnabled": true, "isAuditEnabled": true, "policyType": 0,
+              "resources": { "tag": { "values": [ "ADDRESS" ], "isRecursive": false } },
+              "policyItems": [
+                {"accesses": [{"type": "hive:select", "isAllowed": true}], "users": [ "test-user"] }
+              ]
+            },
+            { "id": 101, "name": "101: mask: SENSITIVE(level=normal)", "isEnabled": true, "isAuditEnabled": true, "policyType": 1,
               "resources": { "tag": { "values": [ "SENSITIVE" ], "isRecursive": false } },
               "conditions": [ { "type": "expression", "values": [ "TAG.level == 'normal'" ] } ],
               "dataMaskPolicyItems": [
                 { "accesses": [ { "type": "hive:select", "isAllowed": true } ], "users": [ "test-user"], "dataMaskInfo": { "dataMaskType": "SHUFFLE"}}
               ]
             },
-            { "id": 103, "name": "mask: SENSITIVE(level=high)", "isEnabled": true, "isAuditEnabled": true, "policyType": 1,
+            { "id": 102, "name": "102: mask: SENSITIVE(level=high)", "isEnabled": true, "isAuditEnabled": true, "policyType": 1,
               "resources": { "tag": { "values": [ "SENSITIVE" ], "isRecursive": false } },
               "conditions": [ { "type": "expression", "values": [ "TAG.level == 'high'" ] } ],
               "dataMaskPolicyItems": [
                 { "accesses": [ { "type": "hive:select", "isAllowed": true } ], "users": [ "test-user"], "dataMaskInfo": { "dataMaskType": "MASK"}}
               ]
             },
-            { "id": 104, "name": "mask: SENSITIVE(level=top)", "isEnabled": true, "isAuditEnabled": true, "policyType": 1,
+            { "id": 103, "name": "103: mask: SENSITIVE(level=top)", "isEnabled": true, "isAuditEnabled": true, "policyType": 1,
               "resources": { "tag": { "values": [ "SENSITIVE" ], "isRecursive": false } },
               "conditions": [ { "type": "expression", "values": [ "TAG.level == 'top'" ] } ],
+              "dataMaskPolicyItems": [
+                { "accesses": [ { "type": "hive:select", "isAllowed": true } ], "users": [ "test-user"], "dataMaskInfo": { "dataMaskType": "MASK_HASH"}}
+              ]
+            },
+            { "id": 104, "name": "104: mask: CUSTOMER", "isEnabled": true, "isAuditEnabled": true, "policyType": 1,
+              "resources": { "tag": { "values": [ "CUSTOMER" ], "isRecursive": false } },
+              "dataMaskPolicyItems": [
+                { "accesses": [ { "type": "hive:select", "isAllowed": true } ], "users": [ "test-user"], "dataMaskInfo": { "dataMaskType": "MASK_NONE"}}
+              ]
+            },
+            { "id": 105, "name": "105: mask: ADDRESS", "isEnabled": true, "isAuditEnabled": true, "policyType": 1,
+              "resources": { "tag": { "values": [ "ADDRESS" ], "isRecursive": false } },
               "dataMaskPolicyItems": [
                 { "accesses": [ { "type": "hive:select", "isAllowed": true } ], "users": [ "test-user"], "dataMaskInfo": { "dataMaskType": "MASK_HASH"}}
               ]
@@ -126,11 +156,8 @@
           "resource":        { "elements": { "database": "db1", "table": "tbl1", "column": "SSN" } },
           "userPermissions": { "test-user": { "select":  { "result": 1, "isFinal": true } } },
           "dataMasks": [
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
             {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "SHUFFLE" },   "isConditional": true },
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "SHUFFLE" },   "isConditional": true },
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK_HASH" }, "isConditional": true },
+            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
             {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK_HASH" }, "isConditional": true }
           ]
         },
@@ -138,11 +165,8 @@
           "resource":        { "elements": { "database": "db1", "table": "tbl1", "column": "Age" } },
           "userPermissions": { "test-user": { "select":  { "result": 1, "isFinal": true } } },
           "dataMasks": [
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
             {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "SHUFFLE" },   "isConditional": true },
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "SHUFFLE" },   "isConditional": true },
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK_HASH" }, "isConditional": true },
+            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
             {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK_HASH" }, "isConditional": true }
           ]
         },
@@ -150,11 +174,8 @@
           "resource":        { "elements": { "database": "db1", "table": "tbl1", "column": "Name" } },
           "userPermissions": { "test-user": { "select":  { "result": 1, "isFinal": true } } },
           "dataMasks": [
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
             {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "SHUFFLE" },   "isConditional": true },
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "SHUFFLE" },   "isConditional": true },
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK_HASH" }, "isConditional": true },
+            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
             {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK_HASH" }, "isConditional": true }
           ]
         },
@@ -170,9 +191,31 @@
           "resource":        { "elements": { "database": "db2", "table": "tbl1", "column": "Name" } },
           "userPermissions": { "test-user": { "select":  { "result": 1, "isFinal": true } } },
           "dataMasks": [
-            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
             {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "SHUFFLE" },   "isConditional": true },
+            {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK" },      "isConditional": true },
             {"users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK_HASH" }, "isConditional": true }
+          ]
+        },
+        { "name":            "database: order",
+          "resource":        { "elements": { "database": "order" } },
+          "userPermissions": { "dba": { "create": { "result":  1, "isFinal":  true } } }
+        },
+        { "name":            "table: order.customer",
+          "resource":        { "elements": { "database": "order", "table": "customer" } },
+          "userPermissions": {
+            "test-user": { "select":  { "result": 1, "isFinal": true } },
+            "dba":       { "create":  { "result": 1, "isFinal": true } }
+          }
+        },
+        { "name":            "column: order.customer.address",
+          "resource":        { "elements": { "database": "order", "table": "customer", "column": "address" } },
+          "userPermissions": {
+            "test-user": { "select":  { "result": 1, "isFinal": true } },
+            "dba":       { "create":  { "result": 1, "isFinal": true } }
+          },
+          "dataMasks": [
+            { "users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK_NONE" }, "isConditional": false },
+            { "users": [ "test-user" ], "groups": [], "roles": [], "accessTypes": [ "select" ], "maskInfo": { "dataMaskType": "MASK_HASH" }, "isConditional": false }
           ]
         }
       ]

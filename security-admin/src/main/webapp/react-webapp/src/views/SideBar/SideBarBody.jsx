@@ -401,6 +401,86 @@ export const SideBarBody = (props) => {
           </div>
 
           <div
+            id="gdsCollapse"
+            className={
+              activeMenu !== null && activeMenu === "gdsCollapse"
+                ? "show-menu"
+                : "hide-menu"
+            }
+          >
+            <div className="drawer-menu-title">
+              <span>GOVERNED DATA SHARING</span>
+              <span className="drawer-menu-close">
+                <img
+                  src={closeIcon}
+                  onClick={() => {
+                    props.closeCollapse();
+                  }}
+                />
+              </span>
+            </div>
+            <ul className="list-group list-group-flush">
+              <React.Fragment>
+                <li className="list-group-item">
+                  <NavLink
+                    to="/gds/mydatasetlisting"
+                    onClick={() => {
+                      props.closeCollapse();
+                    }}
+                    className="list-group-item"
+                  >
+                    My Datasets
+                  </NavLink>
+                </li>
+                <li className="list-group-item">
+                  <NavLink
+                    to="/gds/mydatasharelisting"
+                    onClick={() => {
+                      props.closeCollapse();
+                    }}
+                    className="list-group-item"
+                  >
+                    My Datashares
+                  </NavLink>
+                </li>
+                <li className="list-group-item">
+                  <NavLink
+                    to="gds/request/list"
+                    onClick={() => {
+                      props.closeCollapse();
+                    }}
+                    className="list-group-item"
+                  >
+                    My Requests
+                  </NavLink>
+                </li>
+                <li className="list-group-item">
+                  <NavLink
+                    to="gds/datasetlisting"
+                    onClick={() => {
+                      props.closeCollapse();
+                    }}
+                    className="list-group-item"
+                  >
+                    Datasets
+                  </NavLink>
+                </li>
+                <li className="list-group-item">
+                  <NavLink
+                    to="gds/datasharelisting"
+                    onClick={() => {
+                      props.closeCollapse();
+                    }}
+                    className="list-group-item"
+                  >
+                    Datashares
+                  </NavLink>
+                </li>
+              </React.Fragment>
+            </ul>
+          </div>
+
+          <div
             id="auditCollapse"
             className={
               activeMenu !== null && activeMenu === "auditCollapse"
@@ -607,9 +687,17 @@ export const SideBarBody = (props) => {
                   Profile
                 </NavLink>
               </li>
-              {/* <li className="list-group-item">
-                <a href={backboneUrl}>Backbone Classic UI</a>
-              </li> */}
+              <li className="list-group-item">
+                <a
+                  href={backboneUrl}
+                  onClick={() => {
+                    props.closeCollapse();
+                    localStorage.clear();
+                  }}
+                >
+                  Backbone Classic UI
+                </a>
+              </li>
               <li className="list-group-item">
                 <a
                   href={apiUrl}

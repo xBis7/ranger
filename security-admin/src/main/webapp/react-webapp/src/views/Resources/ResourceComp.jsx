@@ -22,11 +22,11 @@ import { Form as FormB, Row, Col } from "react-bootstrap";
 import { Field } from "react-final-form";
 import Select from "react-select";
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
-import { filter, groupBy, some, sortBy } from "lodash";
+import { filter, groupBy, some } from "lodash";
 import { toast } from "react-toastify";
 import { udfResourceWarning } from "../../utils/XAMessages";
-import { RangerPolicyType } from "Utils/XAEnums";
 import ResourceSelectComp from "./ResourceSelectComp";
+import { getResourcesDefVal } from "../../utils/XAUtils";
 
 const noneOptions = {
   label: "None",
@@ -39,20 +39,15 @@ export default function ResourceComp(props) {
     formValues,
     serviceDetails,
     policyType,
-    policyItem,
-    policyId
+    policyId,
+    name,
+    isMultiResources,
+    isGds
   } = props;
   const [rsrcState, setLoader] = useState({ loader: false, resourceKey: -1 });
   const toastId = useRef(null);
 
-  let resources = sortBy(serviceCompDetails.resources, "itemId");
-  if (RangerPolicyType.RANGER_MASKING_POLICY_TYPE.value == policyType) {
-    resources = sortBy(serviceCompDetails.dataMaskDef.resources, "itemId");
-  } else if (
-    RangerPolicyType.RANGER_ROW_FILTER_POLICY_TYPE.value == policyType
-  ) {
-    resources = sortBy(serviceCompDetails.rowFilterDef.resources, "itemId");
-  }
+  let resources = getResourcesDefVal(serviceCompDetails, policyType);
 
   useEffect(() => {
     if (rsrcState.loader) {
@@ -90,7 +85,11 @@ export default function ResourceComp(props) {
 
   const RenderValidateField = ({ name }) =>
     (formValues && formValues[name]?.mandatory && (
-      <span className="compulsory-resource">*</span>
+      <span
+        className={!isGds ? "compulsory-resource" : "compulsory-resource top-0"}
+      >
+        *
+      </span>
     )) ||
     null;
 
@@ -139,14 +138,7 @@ export default function ResourceComp(props) {
       delete formValues[`isExcludesSupport-${levelKey}`];
       delete formValues[`isRecursiveSupport-${levelKey}`];
     }
-    if (policyItem) {
-      removedSeletedAccess();
-    }
     delete formValues[`value-${grpResourcesKeys[index]}`];
-    setLoader({
-      loader: true,
-      resourceKey: grpResourcesKeys[index]
-    });
     let CurrentSelectedResourcs = selectedVal.name;
     for (let j = index + 1; j < grpResourcesKeys.length; j++) {
       let level = grpResourcesKeys[j];
@@ -167,21 +159,10 @@ export default function ResourceComp(props) {
     }
 
     input.onChange(selectedVal);
-  };
-
-  const removedSeletedAccess = () => {
-    for (const name of [
-      "policyItems",
-      "allowExceptions",
-      "denyPolicyItems",
-      "denyExceptions"
-    ]) {
-      for (const policyObj of formValues[name]) {
-        if (policyObj?.accesses) {
-          policyObj.accesses = [];
-        }
-      }
-    }
+    setLoader({
+      loader: true,
+      resourceKey: grpResourcesKeys[index]
+    });
   };
 
   return grpResourcesKeys.map((levelKey, index) => {
@@ -215,8 +196,12 @@ export default function ResourceComp(props) {
           <Field
             defaultValue={!policyId && getResourceLabelOp(levelKey, index)[0]}
             className="form-control"
-            name={`resourceName-${levelKey}`}
-            render={({ input, meta }) =>
+            name={
+              isMultiResources
+                ? `${name}.resourceName-${levelKey}`
+                : `resourceName-${levelKey}`
+            }
+            render={({ input }) =>
               formValues[resourceKey] ? (
                 renderResourceSelect(levelKey, index) ? (
                   <span className="pull-right fnt-14">
@@ -235,7 +220,7 @@ export default function ResourceComp(props) {
                       onChange={(value) =>
                         handleResourceChange(value, input, index)
                       }
-                      styles={customStyles}
+                      styles={!isGds ? customStyles : ""}
                       isSearchable={false}
                     />
                     <RenderValidateField name={`resourceName-${levelKey}`} />
@@ -248,24 +233,31 @@ export default function ResourceComp(props) {
 
         {formValues[`resourceName-${levelKey}`] && (
           <>
-            <Col sm={5}>
+            <Col sm={!isGds ? 5 : 9}>
               <ResourceSelectComp
                 levelKey={levelKey}
                 formValues={formValues}
                 grpResourcesKeys={grpResourcesKeys}
                 serviceDetails={serviceDetails}
+                name={name}
+                isMultiResources={isMultiResources}
               />
             </Col>
           </>
         )}
-        {formValues[`resourceName-${levelKey}`] && (
+
+        {formValues[`resourceName-${levelKey}`] && !isGds && (
           <Col sm={4}>
             <Row>
               {formValues[`resourceName-${levelKey}`]["excludesSupported"] && (
                 <Col sm={5}>
                   <Field
                     className="form-control"
-                    name={`isExcludesSupport-${levelKey}`}
+                    name={
+                      isMultiResources
+                        ? `${name}.isExcludesSupport-${levelKey}`
+                        : `isExcludesSupport-${levelKey}`
+                    }
                     render={({ input }) => (
                       <BootstrapSwitchButton
                         {...input}
@@ -286,7 +278,11 @@ export default function ResourceComp(props) {
                 <Col sm={5} className="toggle-switch">
                   <Field
                     className="form-control"
-                    name={`isRecursiveSupport-${levelKey}`}
+                    name={
+                      isMultiResources
+                        ? `${name}.isRecursiveSupport-${levelKey}`
+                        : `isRecursiveSupport-${levelKey}`
+                    }
                     render={({ input }) => (
                       <BootstrapSwitchButton
                         {...input}

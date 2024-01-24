@@ -23,7 +23,17 @@ import { FieldArray } from "react-final-form-arrays";
 import { Col } from "react-bootstrap";
 import { Field } from "react-final-form";
 import AsyncSelect from "react-select/async";
-import { find, groupBy, isEmpty, isArray } from "lodash";
+import {
+  find,
+  groupBy,
+  isEmpty,
+  isArray,
+  has,
+  map,
+  filter,
+  some,
+  isEqual
+} from "lodash";
 import { toast } from "react-toastify";
 import Editable from "Components/Editable";
 import { RangerPolicyType } from "Utils/XAEnums";
@@ -49,7 +59,9 @@ export default function PolicyPermissionItem(props) {
     fetchUsersData,
     fetchGroupsData,
     fetchRolesData,
-    formValues
+    formValues,
+    changePolicyItemPermissions,
+    isMultiResources
   } = props;
   const dragItem = useRef();
   const dragOverItem = useRef();
@@ -104,38 +116,72 @@ export default function PolicyPermissionItem(props) {
   }, []);
 
   const getAccessTypeOptions = () => {
-    let srcOp = [];
-    for (let i = grpResourcesKeys.length - 1; i >= 0; i--) {
-      let selectedResource = `resourceName-${grpResourcesKeys[i]}`;
-      if (
-        formValues[selectedResource] &&
-        formValues[selectedResource].value !== noneOptions.value
-      ) {
-        if (
-          RangerPolicyType.RANGER_MASKING_POLICY_TYPE.value ==
-          formValues.policyType
-        ) {
-          srcOp = serviceCompDetails.dataMaskDef.accessTypes;
-        } else if (
-          RangerPolicyType.RANGER_ROW_FILTER_POLICY_TYPE.value ==
-          formValues.policyType
-        ) {
-          srcOp = serviceCompDetails.rowFilterDef.accessTypes;
-        } else {
-          srcOp = serviceCompDetails.accessTypes;
-        }
-        if (formValues[selectedResource].accessTypeRestrictions?.length > 0) {
-          let op = [];
-          for (const name of formValues[selectedResource]
-            .accessTypeRestrictions) {
-            let typeOp = find(srcOp, { name });
-            if (typeOp) {
-              op.push(typeOp);
+    let srcOp = [],
+      multiplePermissionItem = [];
+    if (
+      RangerPolicyType.RANGER_MASKING_POLICY_TYPE.value == formValues.policyType
+    ) {
+      srcOp = serviceCompDetails.dataMaskDef.accessTypes;
+    } else if (
+      RangerPolicyType.RANGER_ROW_FILTER_POLICY_TYPE.value ==
+      formValues.policyType
+    ) {
+      srcOp = serviceCompDetails.rowFilterDef.accessTypes;
+    } else {
+      srcOp = serviceCompDetails.accessTypes;
+    }
+    if (changePolicyItemPermissions) {
+      if (isMultiResources) {
+        map(formValues.additionalResources, (resourceObj) => {
+          for (let i = grpResourcesKeys.length - 1; i >= 0; i--) {
+            let selectedResource = `resourceName-${grpResourcesKeys[i]}`;
+            if (
+              resourceObj[selectedResource] &&
+              resourceObj[selectedResource].value !== noneOptions.value
+            ) {
+              if (
+                resourceObj[selectedResource].accessTypeRestrictions?.length > 0
+              ) {
+                let op = [];
+                for (const name of resourceObj[selectedResource]
+                  .accessTypeRestrictions) {
+                  let typeOp = find(srcOp, { name });
+                  if (typeOp) {
+                    op.push(typeOp);
+                  }
+                }
+                multiplePermissionItem = [...multiplePermissionItem, ...op];
+              } else {
+                multiplePermissionItem = [...srcOp];
+              }
+              break;
             }
           }
-          srcOp = op;
+        });
+        srcOp = [...new Set(multiplePermissionItem)];
+      } else {
+        for (let i = grpResourcesKeys.length - 1; i >= 0; i--) {
+          let selectedResource = `resourceName-${grpResourcesKeys[i]}`;
+          if (
+            formValues[selectedResource] &&
+            formValues[selectedResource].value !== noneOptions.value
+          ) {
+            if (
+              formValues[selectedResource].accessTypeRestrictions?.length > 0
+            ) {
+              let op = [];
+              for (const name of formValues[selectedResource]
+                .accessTypeRestrictions) {
+                let typeOp = find(srcOp, { name });
+                if (typeOp) {
+                  op.push(typeOp);
+                }
+              }
+              srcOp = op;
+            }
+            break;
+          }
         }
-        break;
       }
     }
     return srcOp.map(({ label, name: value }) => ({
@@ -454,6 +500,7 @@ export default function PolicyPermissionItem(props) {
                               </td>
                             );
                           } else {
+                            let accessTypeOptions = getAccessTypeOptions();
                             return (
                               <td key={colName} className="align-middle">
                                 <Field
@@ -465,18 +512,39 @@ export default function PolicyPermissionItem(props) {
                                       index
                                     )
                                   }
-                                  render={({ input }) => (
-                                    <div className="table-editable">
-                                      <Editable
-                                        {...input}
-                                        placement="auto"
-                                        type="checkbox"
-                                        options={getAccessTypeOptions()}
-                                        showSelectAll={true}
-                                        selectAllLabel="Select All"
-                                      />
-                                    </div>
-                                  )}
+                                  render={({ input, meta }) => {
+                                    if (
+                                      formValues[attrName][index]?.accesses &&
+                                      isArray(
+                                        formValues[attrName][index].accesses
+                                      ) &&
+                                      changePolicyItemPermissions
+                                    ) {
+                                      let accTypeVal = filter(
+                                        formValues[attrName][index].accesses,
+                                        (m) => {
+                                          if (some(accessTypeOptions, m)) {
+                                            return m;
+                                          }
+                                        }
+                                      );
+                                      if (!isEqual(input.value, accTypeVal)) {
+                                        input.onChange(accTypeVal);
+                                      }
+                                    }
+                                    return (
+                                      <div className="table-editable">
+                                        <Editable
+                                          {...input}
+                                          placement="auto"
+                                          type="checkbox"
+                                          options={accessTypeOptions}
+                                          showSelectAll={true}
+                                          selectAllLabel="Select All"
+                                        />
+                                      </div>
+                                    );
+                                  }}
                                 />
                               </td>
                             );

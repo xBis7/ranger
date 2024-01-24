@@ -23,10 +23,12 @@ import javax.persistence.NoResultException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ranger.common.RangerCommonEnums;
 import org.apache.ranger.common.db.BaseDao;
 import org.apache.ranger.entity.XXUser;
+import org.apache.ranger.plugin.model.RangerPrincipal;
 import org.apache.ranger.plugin.model.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,6 +133,39 @@ public class XXUserDao extends BaseDao<XXUser> {
 			}
 		}
 		return users;
+	}
+
+	public List<RangerPrincipal> lookupPrincipalByName(String principalName, int startIndex, int pageSize) {
+		List<RangerPrincipal> ret = new ArrayList<>();
+
+		try {
+			List<Object[]> results = getEntityManager().createNamedQuery("VXXPrincipal.lookupByName", Object[].class)
+														.setParameter("principalName", principalName + "%")
+														.setFirstResult(startIndex)
+														.setMaxResults(pageSize).getResultList();
+
+			if (results != null) {
+				for (Object[] result : results) {
+					String name = (String) result[0];
+					Number type = (Number) result[1];
+
+					switch (type.intValue()) {
+						case 0:
+							ret.add(new RangerPrincipal(RangerPrincipal.PrincipalType.USER, name));
+						break;
+						case 1:
+							ret.add(new RangerPrincipal(RangerPrincipal.PrincipalType.GROUP, name));
+						break;
+						case 2:
+							ret.add(new RangerPrincipal(RangerPrincipal.PrincipalType.ROLE, name));
+						break;
+					}
+				}
+			}
+		} catch (NoResultException e) {
+			ret = ListUtils.EMPTY_LIST;
+		}
+		return ret;
 	}
 
 	public List<UserInfo> getAllUsersInfo() {

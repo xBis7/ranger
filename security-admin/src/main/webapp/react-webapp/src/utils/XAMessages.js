@@ -18,10 +18,11 @@
  */
 
 import React from "react";
+import { pluginStatusColumnInfoMsg } from "./XAEnums";
 
 export const RegexMessage = {
   MESSAGE: {
-    policynameinfoiconmessage:
+    policyNameInfoIconMessage:
       "Please avoid these characters (&, <, >, ', \", `) for policy name.",
     userNameValidationMsg: (
       <>
@@ -49,7 +50,7 @@ export const RegexMessage = {
         </p>
       </>
     ),
-    policyconditioninfoicon:
+    policyConditionInfoIcon:
       "1. JavaScript Condition Examples :\
                       country_code == 'USA', time_range >= 900 time_range <= 1800 etc.\
                       2. Dragging bottom-right corner of javascript condition editor(Textarea) can resizable",
@@ -127,5 +128,26 @@ export const udfResourceWarning = () => {
       <strong>Warning !! </strong> : UDF create is a privileged operation.
       Please make sure you grant them to only trusted users.
     </p>
+  );
+};
+
+/* PluginStatus Column Info */
+
+export const pluginStatusColumnInfo = (colName) => {
+  return (
+    <ul className="list-inline">
+      <li className="list-inline-item">
+        <strong>Last Update: </strong>{" "}
+        {pluginStatusColumnInfoMsg[colName].lastUpdated}
+      </li>
+      <li className="list-inline-item">
+        <strong>Download: </strong>
+        {pluginStatusColumnInfoMsg[colName].downloadTime}
+      </li>
+      <li className="list-inline-item">
+        <strong>Active: </strong>{" "}
+        {pluginStatusColumnInfoMsg[colName].activeTime}
+      </li>
+    </ul>
   );
 };

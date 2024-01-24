@@ -44,8 +44,11 @@ import org.apache.ranger.plugin.model.GroupInfo;
 import org.apache.ranger.plugin.model.RangerPolicy;
 import org.apache.ranger.plugin.model.RangerPolicy.RangerDataMaskPolicyItem;
 import org.apache.ranger.plugin.model.RangerPolicy.RangerPolicyItem;
+import org.apache.ranger.plugin.model.RangerPolicy.RangerPolicyResource;
 import org.apache.ranger.plugin.model.RangerPolicy.RangerRowFilterPolicyItem;
+import org.apache.ranger.plugin.model.RangerPrincipal;
 import org.apache.ranger.plugin.model.UserInfo;
+import org.apache.ranger.plugin.store.EmbeddedServiceDefsUtil;
 import org.apache.ranger.plugin.util.RangerUserStore;
 import org.apache.ranger.service.*;
 import org.apache.ranger.ugsyncutil.model.GroupUserInfo;
@@ -98,10 +101,11 @@ import org.apache.ranger.entity.XXPortalUserRole;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import static org.apache.ranger.db.XXGlobalStateDao.RANGER_GLOBAL_STATE_NAME_USER_GROUP;
+
 @Component
 public class XUserMgr extends XUserMgrBase {
 
-	private static final String RANGER_USER_GROUP_GLOBAL_STATE_NAME = "RangerUserStore";
 	private static final String USER = "User";
 	private static final String GROUP = "Group";
 	private static final int MAX_DB_TRANSACTION_RETRIES = 5;
@@ -162,6 +166,9 @@ public class XUserMgr extends XUserMgrBase {
 
 	@Autowired
 	RangerTransactionSynchronizationAdapter transactionSynchronizationAdapter;
+
+	@Autowired
+	GdsDBStore gdsStore;
 
 	@Autowired
 	@Qualifier(value = "transactionManager")
@@ -2010,6 +2017,16 @@ public class XUserMgr extends XUserMgrBase {
 		return listMasked;
 	}
 
+	public List<RangerPrincipal> getRangerPrincipals(SearchCriteria searchCriteria){
+		String searchString = (String) searchCriteria.getParamValue("name");
+		int    startIdx     = searchCriteria.getStartIndex();
+		int    maxRows      = searchCriteria.getMaxRows();
+
+		List<RangerPrincipal> ret = daoManager.getXXUser().lookupPrincipalByName(searchString, startIdx, maxRows);
+
+		return ret;
+	}
+
 	public boolean hasAccessToModule(String moduleName){
 		UserSessionBase userSession = ContextUtil.getCurrentUserSession();
 		if (userSession != null && userSession.getLoginId()!=null){
@@ -2138,12 +2155,37 @@ public class XUserMgr extends XUserMgrBase {
 				rangerPolicy.setRowFilterPolicyItems(rowFilterItems);
 
 				try {
-					svcStore.updatePolicy(rangerPolicy);
+					if (StringUtils.equals(rangerPolicy.getServiceType(), EmbeddedServiceDefsUtil.EMBEDDED_SERVICEDEF_GDS_NAME)) {
+						Map<String, RangerPolicyResource> resources = rangerPolicy.getResources();
+
+						if (MapUtils.isEmpty(resources)) {
+							continue;
+						}
+
+						if (resources.containsKey(GdsDBStore.RESOURCE_NAME_DATASET_ID)) {
+							RangerPolicyResource policyRes = resources.get(GdsDBStore.RESOURCE_NAME_DATASET_ID);
+							List<String>         resValues = policyRes != null ? policyRes.getValues() : null;
+
+							if (CollectionUtils.isNotEmpty(resValues)) {
+								gdsStore.updateDatasetPolicy(Long.valueOf(resValues.get(0)), rangerPolicy);
+							}
+						} else if (resources.containsKey(GdsDBStore.RESOURCE_NAME_PROJECT_ID)) {
+							RangerPolicyResource policyRes = resources.get(GdsDBStore.RESOURCE_NAME_PROJECT_ID);
+							List<String>         resValues = policyRes != null ? policyRes.getValues() : null;
+
+							if (CollectionUtils.isNotEmpty(resValues)) {
+								gdsStore.updateProjectPolicy(Long.valueOf(resValues.get(0)), rangerPolicy);
+							}
+						}
+					} else {
+						svcStore.updatePolicy(rangerPolicy);
+					}
 				} catch (Throwable excp) {
 					logger.error("updatePolicy(" + rangerPolicy + ") failed", excp);
 					restErrorUtil.createRESTException(excp.getMessage());
 				}
 			}
+
 			if(CollectionUtils.isNotEmpty(xXGroupPermissions)){
 				for (XXGroupPermission xXGroupPermission : xXGroupPermissions) {
 					if(xXGroupPermission!=null){
@@ -2157,6 +2199,8 @@ public class XUserMgr extends XUserMgrBase {
 			}
 			//delete group from audit filter configs
 			svcStore.updateServiceAuditConfig(vXGroup.getName(), REMOVE_REF_TYPE.GROUP);
+			// delete group from dataset,datashare,project
+			gdsStore.deletePrincipalFromGdsAcl(REMOVE_REF_TYPE.GROUP.toString(), vXGroup.getName());
 			//delete XXGroup
 			xXGroupDao.remove(id);
 			//Create XXTrxLog
@@ -2376,14 +2420,41 @@ public class XUserMgr extends XUserMgrBase {
 				rangerPolicy.setRowFilterPolicyItems(rowFilterItems);
 
 				try{
-					svcStore.updatePolicy(rangerPolicy);
-				}catch(Throwable excp) {
+					if (StringUtils.equals(rangerPolicy.getServiceType(), EmbeddedServiceDefsUtil.EMBEDDED_SERVICEDEF_GDS_NAME)) {
+						Map<String, RangerPolicyResource> resources = rangerPolicy.getResources();
+
+						if (MapUtils.isEmpty(resources)) {
+							continue;
+						}
+
+						if (resources.containsKey(GdsDBStore.RESOURCE_NAME_DATASET_ID)) {
+							RangerPolicyResource policyRes = resources.get(GdsDBStore.RESOURCE_NAME_DATASET_ID);
+							List<String>         resValues = policyRes != null ? policyRes.getValues() : null;
+
+							if (CollectionUtils.isNotEmpty(resValues)) {
+								gdsStore.updateDatasetPolicy(Long.valueOf(resValues.get(0)), rangerPolicy);
+							}
+						} else if (resources.containsKey(GdsDBStore.RESOURCE_NAME_PROJECT_ID)) {
+							RangerPolicyResource policyRes = resources.get(GdsDBStore.RESOURCE_NAME_PROJECT_ID);
+							List<String>         resValues = policyRes != null ? policyRes.getValues() : null;
+
+							if (CollectionUtils.isNotEmpty(resValues)) {
+								gdsStore.updateProjectPolicy(Long.valueOf(resValues.get(0)), rangerPolicy);
+							}
+						}
+					} else {
+						svcStore.updatePolicy(rangerPolicy);
+					}
+				} catch(Throwable excp) {
 					logger.error("updatePolicy(" + rangerPolicy + ") failed", excp);
 					throw restErrorUtil.createRESTException(excp.getMessage());
 				}
 			}
+
 			//delete user from audit filter configs
 			svcStore.updateServiceAuditConfig(vXUser.getName(), REMOVE_REF_TYPE.USER);
+			//delete gdsObject mapping of user
+			gdsStore.deletePrincipalFromGdsAcl(REMOVE_REF_TYPE.USER.toString(),vXUser.getName());
 			//delete XXUser entry of user
 			xXUserDao.remove(id);
 			//delete XXPortal entry of user
@@ -2649,7 +2720,7 @@ public class XUserMgr extends XUserMgrBase {
 	}
 
 	public Long getUserStoreVersion() {
-		return daoManager.getXXGlobalState().getAppDataVersion(RANGER_USER_GROUP_GLOBAL_STATE_NAME);
+		return daoManager.getXXGlobalState().getAppDataVersion(RANGER_GLOBAL_STATE_NAME_USER_GROUP);
 	}
 
 	public Set<UserInfo> getUsers() {
@@ -2752,7 +2823,7 @@ public class XUserMgr extends XUserMgrBase {
 					do {
 						noOfRetries++;
 						try {
-							daoManager.getXXGlobalState().onGlobalAppDataChange(RANGER_USER_GROUP_GLOBAL_STATE_NAME);
+							daoManager.getXXGlobalState().onGlobalAppDataChange(RANGER_GLOBAL_STATE_NAME_USER_GROUP);
 							if (logger.isDebugEnabled()) {
 								logger.debug("createOrUpdateXGroups(): Successfully updated x_ranger_global_state table");
 							}
@@ -3338,7 +3409,7 @@ public class XUserMgr extends XUserMgrBase {
 
 	private void updateUserStoreVersion(String label) {
 		try {
-			daoManager.getXXGlobalState().onGlobalAppDataChange(RANGER_USER_GROUP_GLOBAL_STATE_NAME);
+			daoManager.getXXGlobalState().onGlobalAppDataChange(RANGER_GLOBAL_STATE_NAME_USER_GROUP);
 		} catch (Exception excp) {
 			logger.error(label + ": userStore version update failed", excp);
 		}
