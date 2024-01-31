@@ -1167,4 +1167,3 @@ class RangerHdfsAuditHandler extends RangerDefaultAuditHandler {
 		}
 	}
 }
-
