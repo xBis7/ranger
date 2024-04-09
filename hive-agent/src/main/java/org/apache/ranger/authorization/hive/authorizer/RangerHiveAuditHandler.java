@@ -21,7 +21,6 @@ package org.apache.ranger.authorization.hive.authorizer;
 
 import java.util.*;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -355,7 +354,7 @@ public class RangerHiveAuditHandler extends RangerDefaultAuditHandler {
 		if (val instanceof List<?>) {
 			List<String> resourcePathVal = (List<String>) val;
 
-			if (CollectionUtils.isNotEmpty(resourcePathVal)) {
+			if (!resourcePathVal.isEmpty()) {
 				ret = resourcePathVal.iterator().next();
 			}
 		}

@@ -19,7 +19,6 @@
 
 package org.apache.ranger.authorization.hive.authorizer;
 
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hive.ql.security.authorization.plugin.HivePolicyChangeListener;
 import org.apache.hadoop.hive.ql.security.authorization.plugin.HivePolicyProvider;
@@ -119,7 +118,7 @@ public class RangerHivePolicyProvider implements HivePolicyProvider {
 
 	    Map<String, Map<HiveResourceACLs.Privilege, HiveResourceACLs.AccessResult>> ret = new HashMap<>();
 
-	    if (MapUtils.isNotEmpty(rangerACLs)) {
+	    if (!rangerACLs.isEmpty()) {
 
 		    for (Map.Entry<String, Map<String, RangerResourceACLs.AccessResult>> entry : rangerACLs.entrySet()) {
 
