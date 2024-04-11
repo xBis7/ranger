@@ -35,9 +35,11 @@
 
 	<property>
 		<name>ranger.plugin.hdfs.policy.rest.url</name>
-		<value>http://policymanagerhost:port</value>
+		<value>http://ranger:6080</value>
 		<description>
-			URL to Ranger Admin
+			URL to Ranger Admin.
+			If HDFS is running in docker containers, this has to be `ranger`.
+			Otherwise, set it to `localhost`.
 		</description>
 	</property>
 
@@ -51,7 +53,7 @@
 
 	<property>
 		<name>ranger.plugin.hdfs.policy.pollIntervalMs</name>
-		<value>30000</value>
+		<value>10000</value>
 		<description>
 			How often to poll for changes in policies?
 		</description>

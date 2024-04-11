@@ -50,7 +50,7 @@
 
 	<property>
 		<name>xasecure.audit.hdfs.config.destination.directory</name>
-		<value>hdfs://NAMENODE_HOST:8020/ranger/audit/%app-type%/%time:yyyyMMdd%</value>
+		<value>hdfs://namenode:8020/ranger/audit/%app-type%/%time:yyyyMMdd%</value>
 	</property>	
 
 	<property>
@@ -211,6 +211,6 @@
 	<property>
 		<name>xasecure.audit.solr.solr_url</name>
 		<value>http://localhost:6083/solr/ranger_audits</value>
-	</property>	
+	</property>
 	
 </configuration>
