@@ -68,7 +68,8 @@ else
     DB_SERVICE_NAME="ranger-${RANGER_DB_TYPE}"
 fi
 
-CORE_SERVICES="ranger-base,ranger,${DB_SERVICE_NAME},ranger-usersync"
+#CORE_SERVICES="ranger-base,ranger,${DB_SERVICE_NAME},ranger-usersync"
+CORE_SERVICES="ranger-base,ranger,${DB_SERVICE_NAME}"
 
 if [ -z "${ENABLED_RANGER_SERVICES}" ]
 then
