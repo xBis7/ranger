@@ -21,6 +21,10 @@ package org.apache.ranger.authorization.hive.authorizer;
 
 import java.util.*;
 
+// After upgrading the hive dependency to 4.0.0, the method `isNotEmpty()` is not present anymore in `CollectionUtils`.
+// Since removing all usages of `CollectionUtils`, we also have to remove the import to work around
+// a mvn error from the checkstyle plugin. Same goes for `MapUtils` in other classes.
+// import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
