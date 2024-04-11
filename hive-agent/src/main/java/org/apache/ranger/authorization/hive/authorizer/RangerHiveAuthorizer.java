@@ -159,7 +159,6 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 								appType = "hiveServer2";
 							break;
 
-							/*
 							case HIVEMETASTORE:
 								appType = "hiveMetastore";
 								break;
@@ -168,7 +167,6 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 								appType = "other";
 								break;
 
-							 */
 						}
 					}
 
