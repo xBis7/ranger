@@ -288,13 +288,21 @@
         <directoryMode>755</directoryMode>
         <fileMode>644</fileMode>
         <includes>
+<!--          Updated parent pom versions for 'commons.io', 'woodstox-core', -->
+<!--          'stax2-api', 'commons.configuration.version' and 'commons.compress.version'-->
+<!--          to the same versions that hadoop-common is using.-->
+<!--          'htrace-core4' no longer exists in Hadoop, it's left the same.-->
+<!--          'slf4j.version' is excluded from hadoop-common, it's left the same.-->
           <include>commons-cli:commons-cli</include>
           <include>commons-collections:commons-collections</include>
           <include>commons-configuration:commons-configuration</include>
           <include>commons-io:commons-io:jar:${commons.io.version}</include>
           <include>commons-lang:commons-lang</include>
           <include>commons-logging:commons-logging</include>
-          <include>com.google.guava:guava</include>
+<!--          <include>com.google.guava:guava</include>-->
+<!--          Hadoop 3.3.6 uses shaded guava-->
+          <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:1.1.1</include>
+<!--          -->
           <include>org.slf4j:slf4j-api:jar:${slf4j.version}</include>
           <include>org.apache.commons:commons-lang3</include>
           <include>org.apache.hadoop:hadoop-common</include>
