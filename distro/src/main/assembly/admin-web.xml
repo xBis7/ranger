@@ -301,7 +301,7 @@
           <include>commons-logging:commons-logging</include>
 <!--          <include>com.google.guava:guava</include>-->
 <!--          Hadoop 3.3.6 uses shaded guava-->
-          <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:1.1.1</include>
+          <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:${hadoop-thirdparty-guava.version}</include>
 <!--          -->
           <include>org.slf4j:slf4j-api:jar:${slf4j.version}</include>
           <include>org.apache.commons:commons-lang3</include>
