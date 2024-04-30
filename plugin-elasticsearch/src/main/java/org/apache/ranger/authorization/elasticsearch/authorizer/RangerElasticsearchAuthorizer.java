@@ -33,7 +33,7 @@ import org.apache.ranger.services.elasticsearch.privilege.IndexPrivilegeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
+import org.apache.hadoop.thirdparty.com.google.common.collect.Sets;
 
 public class RangerElasticsearchAuthorizer implements RangerElasticsearchAccessControl {
 

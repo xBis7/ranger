@@ -17,7 +17,7 @@
 
 package org.apache.ranger.services.schema.registry.client.connection;
 
-import com.google.common.io.Resources;
+import org.apache.hadoop.thirdparty.com.google.common.io.Resources;
 import com.hortonworks.registries.schemaregistry.SchemaMetadata;
 import com.hortonworks.registries.schemaregistry.SchemaVersion;
 import com.hortonworks.registries.schemaregistry.webservice.LocalSchemaRegistryServer;

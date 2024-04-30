@@ -27,7 +27,7 @@ import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthentica
 import org.apache.hadoop.security.token.delegation.web.KerberosDelegationTokenAuthenticationHandler;
 import org.apache.hadoop.security.token.delegation.web.PseudoDelegationTokenAuthenticationHandler;
 
-import com.google.common.annotations.VisibleForTesting;
+import org.apache.hadoop.thirdparty.com.google.common.annotations.VisibleForTesting;
 
 import org.apache.hadoop.http.HtmlQuoting;
 import javax.servlet.FilterChain;

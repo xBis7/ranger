@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.MoreObjects;
+import org.apache.hadoop.thirdparty.com.google.common.base.MoreObjects;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.filter.FilterBase;

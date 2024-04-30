@@ -32,7 +32,7 @@ import org.apache.ranger.plugin.store.ServiceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
+import org.apache.hadoop.thirdparty.com.google.common.collect.Sets;
 
 public class RangerServiceValidator extends RangerValidator {
 	private static final Logger LOG = LoggerFactory.getLogger(RangerServiceValidator.class);

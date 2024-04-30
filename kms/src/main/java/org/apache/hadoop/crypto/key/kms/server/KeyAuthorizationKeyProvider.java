@@ -34,9 +34,9 @@ import org.apache.hadoop.security.authorize.AuthorizationException;
 import org.apache.ranger.plugin.util.AutoClosableLock.AutoClosableReadLock;
 import org.apache.ranger.plugin.util.AutoClosableLock.AutoClosableWriteLock;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
+import org.apache.hadoop.thirdparty.com.google.common.base.Preconditions;
+import org.apache.hadoop.thirdparty.com.google.common.base.Strings;
+import org.apache.hadoop.thirdparty.com.google.common.collect.ImmutableMap;
 
 /**
  * A {@link KeyProvider} proxy that checks whether the current user derived via

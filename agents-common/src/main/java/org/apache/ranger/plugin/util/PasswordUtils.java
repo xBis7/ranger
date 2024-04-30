@@ -31,9 +31,9 @@ import javax.crypto.spec.PBEParameterSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import org.apache.hadoop.thirdparty.com.google.common.base.Splitter;
+import org.apache.hadoop.thirdparty.com.google.common.base.Strings;
+import org.apache.hadoop.thirdparty.com.google.common.collect.Lists;
 import com.sun.jersey.core.util.Base64;
 public class PasswordUtils {
 

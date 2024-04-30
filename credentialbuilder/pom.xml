@@ -48,11 +48,18 @@
             <artifactId>commons-lang3</artifactId>
             <version>${commons.lang3.version}</version>
         </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.google.guava</groupId>-->
+        <!--            <artifactId>guava</artifactId>-->
+        <!--            <version>${google.guava.version}</version>-->
+        <!--        </dependency>-->
+        <!--        Hadoop 3.3.6 uses shaded guava-->
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${google.guava.version}</version>
+            <groupId>org.apache.hadoop.thirdparty</groupId>
+            <artifactId>hadoop-shaded-guava</artifactId>
+            <version>${hadoop-thirdparty-guava.version}</version>
         </dependency>
+        <!--        -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

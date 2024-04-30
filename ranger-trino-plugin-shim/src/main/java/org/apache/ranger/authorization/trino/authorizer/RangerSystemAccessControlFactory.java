@@ -21,7 +21,7 @@ import io.trino.spi.security.SystemAccessControlFactory;
 
 import java.util.Map;
 
-import static com.google.common.base.Throwables.throwIfUnchecked;
+import static org.apache.hadoop.thirdparty.com.google.common.base.Throwables.throwIfUnchecked;
 import static io.airlift.configuration.ConfigBinder.configBinder;
 import static java.util.Objects.requireNonNull;
 

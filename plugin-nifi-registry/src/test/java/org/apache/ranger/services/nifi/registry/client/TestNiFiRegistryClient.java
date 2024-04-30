@@ -18,7 +18,7 @@
  */
 package org.apache.ranger.services.nifi.registry.client;
 
-import com.google.common.io.Resources;
+import org.apache.hadoop.thirdparty.com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.apache.ranger.plugin.service.ResourceLookupContext;

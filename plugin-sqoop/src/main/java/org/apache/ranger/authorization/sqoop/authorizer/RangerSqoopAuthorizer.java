@@ -38,7 +38,7 @@ import org.apache.sqoop.security.SecurityError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
+import org.apache.hadoop.thirdparty.com.google.common.collect.Sets;
 
 public class RangerSqoopAuthorizer extends AuthorizationValidator {
 	private static final Logger LOG = LoggerFactory.getLogger(RangerSqoopAuthorizer.class);

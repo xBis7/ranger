@@ -60,7 +60,10 @@
           <include>org.apache.httpcomponents:httpmime:jar:${httpcomponents.httpmime.version}</include>
           <include>org.noggit:noggit:jar:${noggit.version}</include>
           <include>org.apache.solr:solr-solrj:jar:${solr.version}</include>
-          <include>com.google.guava:guava:jar:${google.guava.version}</include>
+<!--          <include>com.google.guava:guava:jar:${google.guava.version}</include>-->
+<!--          Hadoop 3.3.6 uses shaded guava-->
+          <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:${hadoop-thirdparty-guava.version}</include>
+<!--          -->
           <include>com.kstruct:gethostname4j:jar:${kstruct.gethostname4j.version}</include>
           <include>net.java.dev.jna:jna:jar:${jna.version}</include>
           <include>net.java.dev.jna:jna-platform:jar:${jna-platform.version}</include>
@@ -98,7 +101,10 @@
           <include>commons-logging:commons-logging:jar:${commons.logging.version}</include>
           <include>org.apache.commons:commons-lang3:jar:${commons.lang3.version}</include>
           <include>org.apache.commons:commons-compress:jar:${commons.compress.version}</include>
-          <include>com.google.guava:guava:jar:${google.guava.version}</include>
+<!--          <include>com.google.guava:guava:jar:${google.guava.version}</include>-->
+<!--          Hadoop 3.3.6 uses shaded guava-->
+          <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:${hadoop-thirdparty-guava.version}</include>
+<!--          -->
           <include>org.slf4j:slf4j-api:jar:${slf4j-api.version}</include>
           <include>org.apache.hadoop:hadoop-common:jar:${hadoop.version}</include>
           <include>org.apache.hadoop:hadoop-auth:jar:${hadoop.version}</include>

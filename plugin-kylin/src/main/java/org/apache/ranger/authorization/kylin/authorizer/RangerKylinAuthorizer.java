@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.acls.model.Permission;
 
-import com.google.common.collect.Sets;
+import org.apache.hadoop.thirdparty.com.google.common.collect.Sets;
 
 public class RangerKylinAuthorizer extends ExternalAclProvider {
 	private static final Logger LOG = LoggerFactory.getLogger(RangerKylinAuthorizer.class);

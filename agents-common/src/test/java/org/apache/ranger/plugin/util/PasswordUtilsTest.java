@@ -26,7 +26,7 @@ import java.security.NoSuchAlgorithmException;
 
 import org.junit.Test;
 
-import com.google.common.base.Joiner;
+import org.apache.hadoop.thirdparty.com.google.common.base.Joiner;
 
 public class PasswordUtilsTest {
 
