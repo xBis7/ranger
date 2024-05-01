@@ -104,6 +104,7 @@ public class EmbeddedServer {
 
 	public void start() {
 		SSLContext sslContext = getSSLContext();
+		LOG.info("HMSA Patch: e3186056b");
 		if (sslContext != null) {
 			SSLContext.setDefault(sslContext);
 		}

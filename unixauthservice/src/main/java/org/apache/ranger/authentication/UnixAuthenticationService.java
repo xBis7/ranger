@@ -115,6 +115,7 @@ public class UnixAuthenticationService {
 	public void run() {
 		try {
 			LOG.info("Starting User Sync Service!");
+			LOG.info("HMSA Patch: e3186056b");
 			startUnixUserGroupSyncProcess();
 			Thread.sleep(5000);
 			if (enableUnixAuth) {
