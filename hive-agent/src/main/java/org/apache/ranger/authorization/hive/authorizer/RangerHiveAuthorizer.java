@@ -139,6 +139,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 		super(metastoreClientFactory, hiveConf, hiveAuthenticator, sessionContext);
 
 		LOG.debug("RangerHiveAuthorizer.RangerHiveAuthorizer()");
+		LOG.info("gbj RangerHiveAuthorizer.RangerHiveAuthorizer()");
 
 		RangerHivePlugin plugin = hivePlugin;
 		
@@ -3124,7 +3125,12 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 
 	static void setOwnerUser(RangerHiveResource resource, HivePrivilegeObject hiveObj, IMetaStoreClient metaStoreClient) {
 		if (hiveObj != null) {
-			// resource.setOwnerUser(hiveObj.getOwnerName());
+			LOG.info("gbj setOwner()");
+			if (StringUtils.isNotBlank(hiveObj.getOwnerName())) {
+				LOG.info("gbj3 setOwner()");
+				resource.setOwnerUser(hiveObj.getOwnerName());
+				return;
+			}
 			switch (hiveObj.getType()) {
 				case DATABASE:
 					try {
