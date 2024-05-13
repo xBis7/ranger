@@ -3124,7 +3124,10 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 
 	static void setOwnerUser(RangerHiveResource resource, HivePrivilegeObject hiveObj, IMetaStoreClient metaStoreClient) {
 		if (hiveObj != null) {
-			// resource.setOwnerUser(hiveObj.getOwnerName());
+			if (StringUtils.isNotBlank(hiveObj.getOwnerName())) {
+				resource.setOwnerUser(hiveObj.getOwnerName());
+				return;
+			}
 			switch (hiveObj.getType()) {
 				case DATABASE:
 					try {
