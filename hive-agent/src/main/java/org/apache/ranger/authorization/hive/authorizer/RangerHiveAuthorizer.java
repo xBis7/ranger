@@ -139,6 +139,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 		super(metastoreClientFactory, hiveConf, hiveAuthenticator, sessionContext);
 
 		LOG.debug("RangerHiveAuthorizer.RangerHiveAuthorizer()");
+		LOG.info("HMSA v1.1");
 
 		RangerHivePlugin plugin = hivePlugin;
 		
