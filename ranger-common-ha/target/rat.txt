@@ -1,0 +1,53 @@
+
+*****************************************************
+Summary
+-------
+Generated at: 2024-02-28T15:07:07+02:00
+Notes: 0
+Binaries: 0
+Archives: 0
+Standards: 16
+
+Apache Licensed: 16
+Generated Documents: 0
+
+JavaDocs are generated and so license header is optional
+Generated files do not required license headers
+
+0 Unknown Licenses
+
+*******************************
+
+Unapproved licenses:
+
+
+*******************************
+
+Archives:
+
+*****************************************************
+  Files with Apache License headers will be marked AL
+  Binary files (which do not require AL headers) will be marked B
+  Compressed archives will be marked A
+  Notices, licenses etc will be marked N
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/pom.xml
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/test/resources/ranger-tagsync-site.xml
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/test/resources/log4j.xml
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/test/java/org/apache/ranger/ha/service/TestRangerServiceServerIdSelector.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/CuratorFactory.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ZookeeperSecurityProperties.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/RangerServiceServerIdSelector.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/annotation/HAService.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/HAConfiguration.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ServiceState.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ActiveInstanceState.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/service/ServiceManager.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/service/HARangerService.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ActiveStateChangeHandler.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ActiveInstanceElectorService.java
+  AL    /Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/RangerHAInitializer.java
+ 
+*****************************************************
+ Printing headers for files without AL header...
+ 
+ 

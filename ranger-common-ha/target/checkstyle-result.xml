@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="8.29">
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/CuratorFactory.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ZookeeperSecurityProperties.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/RangerServiceServerIdSelector.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/annotation/HAService.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/HAConfiguration.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ServiceState.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ActiveInstanceState.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/service/ServiceManager.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/service/HARangerService.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ActiveStateChangeHandler.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ActiveInstanceElectorService.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/RangerHAInitializer.java">
+</file>
+<file name="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/test/java/org/apache/ranger/ha/service/TestRangerServiceServerIdSelector.java">
+</file>
+</checkstyle>

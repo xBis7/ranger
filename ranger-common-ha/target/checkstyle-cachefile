@@ -1,0 +1,15 @@
+#Wed Feb 28 15:07:09 EET 2024
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/service/HARangerService.java=1708522050048
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/RangerHAInitializer.java=1708522050047
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ServiceState.java=1708522050047
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/HAConfiguration.java=1708522050047
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/service/ServiceManager.java=1708522050048
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/annotation/HAService.java=1708522050048
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ActiveInstanceElectorService.java=1708522050047
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ActiveStateChangeHandler.java=1708522050047
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ZookeeperSecurityProperties.java=1708522050047
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/ActiveInstanceState.java=1708522050047
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/test/java/org/apache/ranger/ha/service/TestRangerServiceServerIdSelector.java=1708522050048
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/CuratorFactory.java=1708522050047
+configuration*?=102AA8042552A485B55A106EE9FD9F3834EB4D58
+/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/src/main/java/org/apache/ranger/ha/RangerServiceServerIdSelector.java=1708522050047

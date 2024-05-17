@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <echo file="/Users/xbis/projects/gr-big-data/ranger/ranger-common-ha/target/version" message="3.0.0-SNAPSHOT"/>
+</target>
+</project>

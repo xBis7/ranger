@@ -201,14 +201,14 @@
         <sqoop.version>1.99.7</sqoop.version>
         <storm.version>1.2.4</storm.version>
         <sun-jersey-bundle.version>1.19</sun-jersey-bundle.version>
-        <tomcat.embed.version>8.5.86</tomcat.embed.version>
+        <tomcat.embed.version>8.5.94</tomcat.embed.version>
         <testng.version>6.9.4</testng.version>
         <velocity.version>2.3</velocity.version>
         <zookeeper.version>3.4.14</zookeeper.version>
         <codehaus.woodstox.stax2api.version>4.2.1</codehaus.woodstox.stax2api.version>
         <fasterxml.woodstox.version>5.4.0</fasterxml.woodstox.version>
-        <fasterxml.jackson.version>2.11.3</fasterxml.jackson.version>
-        <fasterxml.jackson.databind.version>2.11.3</fasterxml.jackson.databind.version>
+        <fasterxml.jackson.version>2.12.7</fasterxml.jackson.version>
+        <fasterxml.jackson.databind.version>2.12.7.1</fasterxml.jackson.databind.version>
         <kstruct.gethostname4j.version>1.0.0</kstruct.gethostname4j.version>
         <jna.version>5.7.0</jna.version>
         <jna-platform.version>5.7.0</jna-platform.version>
