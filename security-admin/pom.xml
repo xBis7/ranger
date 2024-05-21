@@ -243,6 +243,12 @@
             <artifactId>jersey-bundle</artifactId>
             <version>${jersey-bundle.version}</version>
         </dependency>
+<!--        This dependency was coming from Hadoop but it has been replaced in Hadoop 3.3.6.-->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jersey-bundle.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-core</artifactId>
@@ -293,6 +299,11 @@
             <artifactId>hadoop-mapreduce-client-core</artifactId>
             <version>${hadoop.version}</version>
             <exclusions>
+                <exclusion>
+<!--                    Hadoop 3.3.6 uses com.github.pjfanning instead of com.sun.jersey.-->
+                    <groupId>com.github.pjfanning</groupId>
+                    <artifactId>jersey-json</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.jaxrs</groupId>
                     <artifactId>jackson-jaxrs-json-provider</artifactId>
@@ -516,7 +527,8 @@
                     <artifactId>jersey-server</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>com.sun.jersey</groupId>
+<!--                    Hadoop 3.3.6 uses com.github.pjfanning instead of com.sun.jersey. -->
+                    <groupId>com.github.pjfanning</groupId>
                     <artifactId>jersey-json</artifactId>
                 </exclusion>
                 <exclusion>

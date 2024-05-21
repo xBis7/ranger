@@ -53,6 +53,15 @@
             <artifactId>tomcat-embed-websocket</artifactId>
             <version>${tomcat.embed.version}</version>
         </dependency>
+<!--        Before upgrading Hadoop to 3.3.6, this dependency was coming from-->
+<!--        ranger-plugins-audit -> hadoop-common-->
+<!--        Now hadoop-common is using com.github.pjfanning:jersey-json-->
+<!--        which needs to be excluded to avoid conflicts.-->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jersey-bundle.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.jdt.core.compiler</groupId>
             <artifactId>ecj</artifactId>
