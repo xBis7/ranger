@@ -2125,8 +2125,12 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 					for(FileStatus file : filestat) {
 						if (FileUtils.isOwnerOfFileHierarchy(fs, file, userName) ||
 								FileUtils.isActionPermittedForFileHierarchy(fs, file, userName, action, recurse)) {
+							LOG.info("HMSA v1.1: RangerHiveAuthorizer.isURIAccessAllowed: Permission allowed: " +
+									"Check for path: " + file.getPath().toString());
 							continue;
 						} else {
+							LOG.info("HMSA v1.1: RangerHiveAuthorizer.isURIAccessAllowed: Permission denied: " +
+									"Check for path: " + file.getPath().toString());
 							isDenied = true;
 							break;
 						}
