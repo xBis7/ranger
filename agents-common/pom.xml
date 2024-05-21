@@ -88,6 +88,10 @@
             <version>${hadoop.version}</version>
             <exclusions>
                 <exclusion>
+                    <groupId>com.github.pjfanning</groupId>
+                    <artifactId>jersey-json:jar</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>net.minidev</groupId>
                     <artifactId>json-smart</artifactId>
                 </exclusion>
