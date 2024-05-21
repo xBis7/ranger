@@ -47,6 +47,10 @@
             <artifactId>hadoop-common</artifactId>
             <version>${hadoop.version}</version>
             <exclusions>
+                <exclusion>
+                    <groupId>com.github.pjfanning</groupId>
+                    <artifactId>jersey-json:jar</artifactId>
+                </exclusion>
                  <exclusion>
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>

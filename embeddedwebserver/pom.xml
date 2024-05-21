@@ -34,6 +34,11 @@
             <version>${tomcat.embed.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jersey-bundle.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-annotations-api</artifactId>
             <version>${tomcat.embed.version}</version>

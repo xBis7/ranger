@@ -44,7 +44,7 @@ for custom_env_script in `find ${XAPOLICYMGR_DIR}/ews/webapp/WEB-INF/classes/con
         fi
 done
 
-debug_args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=3003"
+debug_args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=3003"
 JAVA_OPTS=" ${JAVA_OPTS} -XX:MetaspaceSize=100m -XX:MaxMetaspaceSize=200m -Xmx${ranger_admin_max_heap_size} -Xms1g -Xloggc:${XAPOLICYMGR_EWS_DIR}/logs/gc-worker.log -verbose:gc -XX:+PrintGCDetails ${debug_args}"
 if [[ ${JAVA_OPTS} != *"-Duser.timezone"* ]] ;then  export JAVA_OPTS=" ${JAVA_OPTS} -Duser.timezone=UTC" ;fi
 
