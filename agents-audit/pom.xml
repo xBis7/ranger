@@ -43,13 +43,18 @@
             <version>${commons.lang.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jersey-bundle.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
             <version>${hadoop.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.pjfanning</groupId>
-                    <artifactId>jersey-json:jar</artifactId>
+                    <artifactId>jersey-json</artifactId>
                 </exclusion>
                  <exclusion>
                     <groupId>com.google.guava</groupId>
