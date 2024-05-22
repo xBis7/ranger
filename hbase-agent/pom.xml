@@ -230,6 +230,11 @@
             <scope>test</scope>
             <exclusions>
                 <exclusion>
+<!--                    Hadoop 3.3.6 uses com.github.pjfanning instead of com.sun.jersey.-->
+                    <groupId>com.github.pjfanning</groupId>
+                    <artifactId>jersey-json</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
@@ -244,6 +249,11 @@
             <artifactId>hadoop-common</artifactId>
             <version>${hadoop.version}</version>
             <exclusions>
+                <exclusion>
+<!--                    Hadoop 3.3.6 uses com.github.pjfanning instead of com.sun.jersey.-->
+                    <groupId>com.github.pjfanning</groupId>
+                    <artifactId>jersey-json</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-text</artifactId>

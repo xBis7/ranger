@@ -37,6 +37,11 @@
             <version>${hadoop.version}</version>
             <exclusions>
                 <exclusion>
+<!--                    Hadoop 3.3.6 uses com.github.pjfanning instead of com.sun.jersey.-->
+                    <groupId>com.github.pjfanning</groupId>
+                    <artifactId>jersey-json</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>net.minidev</groupId>
                     <artifactId>json-smart</artifactId>
                 </exclusion>
@@ -65,6 +70,12 @@
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+<!--        This dependency was coming from Hadoop but the package has been replaced in Hadoop 3.3.6.-->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jersey-bundle.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

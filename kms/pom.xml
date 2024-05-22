@@ -59,6 +59,11 @@
             <version>${hadoop.version}</version>
             <exclusions>
                 <exclusion>
+<!--                    Hadoop 3.3.6 uses com.github.pjfanning instead of com.sun.jersey.-->
+                    <groupId>com.github.pjfanning</groupId>
+                    <artifactId>jersey-json</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-compress</artifactId>
                 </exclusion>
@@ -206,6 +211,11 @@
             <scope>test</scope>
             <type>test-jar</type>
             <exclusions>
+                <exclusion>
+<!--                    Hadoop 3.3.6 uses com.github.pjfanning instead of com.sun.jersey.-->
+                    <groupId>com.github.pjfanning</groupId>
+                    <artifactId>jersey-json</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-compress</artifactId>
