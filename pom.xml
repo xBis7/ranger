@@ -145,11 +145,12 @@
         <javax.annotation-api>1.3.2</javax.annotation-api>
         <jaxb.api.version>2.3.1</jaxb.api.version>
         <jericho.html.version>3.3</jericho.html.version>
-        <jersey-bundle.version>1.19.3</jersey-bundle.version>
+<!--        Hadoop 3.3.6 uses jersey version 1.19.4. Upgrade to avoid unexpected behavior.-->
+        <jersey-bundle.version>1.19.4</jersey-bundle.version>
         <jersey-client.version>2.35</jersey-client.version>
-        <jersey-core.version>1.19.3</jersey-core.version>
-        <jersey-server.version>1.19.3</jersey-server.version>
-        <jersey-spring.version>1.19.3</jersey-spring.version>
+        <jersey-core.version>1.19.4</jersey-core.version>
+        <jersey-server.version>1.19.4</jersey-server.version>
+        <jersey-spring.version>1.19.4</jersey-spring.version>
         <jaxb-impl.version>2.3.3</jaxb-impl.version>
         <jettison.version>1.1</jettison.version>
         <jetty-client.version>9.4.31.v20200723</jetty-client.version>
@@ -207,8 +208,10 @@
         <zookeeper.version>3.4.14</zookeeper.version>
         <codehaus.woodstox.stax2api.version>4.2.1</codehaus.woodstox.stax2api.version>
         <fasterxml.woodstox.version>5.4.0</fasterxml.woodstox.version>
-        <fasterxml.jackson.version>2.11.3</fasterxml.jackson.version>
-        <fasterxml.jackson.databind.version>2.11.3</fasterxml.jackson.databind.version>
+<!--        Upgrade fasterxml.jackson version to use the same as Hadoop 3.3.6-->
+<!--        and avoid any unexpected behavior.-->
+        <fasterxml.jackson.version>2.12.7</fasterxml.jackson.version>
+        <fasterxml.jackson.databind.version>2.12.7.1</fasterxml.jackson.databind.version>
         <kstruct.gethostname4j.version>1.0.0</kstruct.gethostname4j.version>
         <jna.version>5.7.0</jna.version>
         <jna-platform.version>5.7.0</jna-platform.version>
@@ -952,8 +955,141 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
             </dependency>
+
+<!--            Add all hadoop packages that might be needed by a module and exclude-->
+<!--            com.github.pjfanning:jersey-json from all of them.-->
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-common</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-auth</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-hdfs</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-hdfs-client</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-minicluster</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-mapreduce-client</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-mapreduce-client-core</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-yarn-common</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-yarn-api</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-client</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-annotations</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.pjfanning</groupId>
+                        <artifactId>jersey-json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jersey-bundle.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <pluginManagement>
             <plugins>
