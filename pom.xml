@@ -1102,10 +1102,18 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
+<!--            Add this to make sure the version stays the same.-->
+            <dependency>
+                <groupId>com.sun.jersey</groupId>
+                <artifactId>jersey-json</artifactId>
+                <version>${jersey-bundle.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+<!--        Add this so that the dependency is available in all submodules.-->
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
