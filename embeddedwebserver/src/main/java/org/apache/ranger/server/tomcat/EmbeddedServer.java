@@ -104,7 +104,7 @@ public class EmbeddedServer {
 
 	public void start() {
 		SSLContext sslContext = getSSLContext();
-		LOG.info("HMSA v1.1");
+		LOG.info("HMSA v1.2");
 		if (sslContext != null) {
 			SSLContext.setDefault(sslContext);
 		}

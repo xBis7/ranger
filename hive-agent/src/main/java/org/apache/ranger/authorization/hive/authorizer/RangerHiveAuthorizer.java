@@ -139,7 +139,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 		super(metastoreClientFactory, hiveConf, hiveAuthenticator, sessionContext);
 
 		LOG.debug("RangerHiveAuthorizer.RangerHiveAuthorizer()");
-		LOG.info("HMSA v1.1");
+		LOG.info("HMSA v1.2");
 
 		RangerHivePlugin plugin = hivePlugin;
 		
@@ -1500,7 +1500,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 		}
 
 		if (resource != null) {
-			setOwnerUser(resource, privilegeObject, getMetaStoreClient());
+			setOwnerUser(resource, privilegeObject);
 
 			resource.setServiceDef(hivePlugin == null ? null : hivePlugin.getServiceDef());
 		}
@@ -1521,7 +1521,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 			case DATABASE:
 				ret = new RangerHiveResource(objectType, hiveObj.getDbname());
 				if (!isCreateOperation(hiveOpType)) {
-					setOwnerUser(ret, hiveObj, getMetaStoreClient());
+					setOwnerUser(ret, hiveObj);
 				}
 			break;
 	
@@ -1535,12 +1535,12 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 							", Size of outputs = [" + (CollectionUtils.isNotEmpty(outputs) ? outputs.size() : 0) + "]");
 				}
 
-				setOwnerUser(ret, hiveObj, getMetaStoreClient());
+				setOwnerUser(ret, hiveObj);
 
 				if (isCreateOperation(hiveOpType)) {
 					HivePrivilegeObject dbObject = getDatabaseObject(hiveObj.getDbname(), inputs, outputs);
 					if (dbObject != null) {
-						setOwnerUser(ret, dbObject, getMetaStoreClient());
+						setOwnerUser(ret, dbObject);
 					}
 				}
 
@@ -1553,7 +1553,7 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 	
 			case COLUMN:
 				ret = new RangerHiveResource(objectType, hiveObj.getDbname(), hiveObj.getObjectName(), StringUtils.join(hiveObj.getColumns(), COLUMN_SEP));
-				setOwnerUser(ret, hiveObj, getMetaStoreClient());
+				setOwnerUser(ret, hiveObj);
 			break;
 
             case URI:
@@ -2125,11 +2125,11 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 					for(FileStatus file : filestat) {
 						if (FileUtils.isOwnerOfFileHierarchy(fs, file, userName) ||
 								FileUtils.isActionPermittedForFileHierarchy(fs, file, userName, action, recurse)) {
-							LOG.info("HMSA v1.1: RangerHiveAuthorizer.isURIAccessAllowed: Permission allowed: " +
+							LOG.info("RangerHiveAuthorizer.isURIAccessAllowed: Permission allowed: " +
 									"Check for path: " + file.getPath().toString());
 							continue;
 						} else {
-							LOG.info("HMSA v1.1: RangerHiveAuthorizer.isURIAccessAllowed: Permission denied: " +
+							LOG.info("RangerHiveAuthorizer.isURIAccessAllowed: Permission denied: " +
 									"Check for path: " + file.getPath().toString());
 							isDenied = true;
 							break;
@@ -3127,12 +3127,28 @@ public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {
 		return request;
 	}
 
+	void setOwnerUser(RangerHiveResource resource, HivePrivilegeObject hiveObj) {
+		if (hiveObj != null) {
+			if (StringUtils.isNotBlank(hiveObj.getOwnerName())) {
+				resource.setOwnerUser(hiveObj.getOwnerName());
+				return;
+			}
+		}
+		setOwnerUserInternal(resource, hiveObj, getMetaStoreClient());
+	}
+
 	static void setOwnerUser(RangerHiveResource resource, HivePrivilegeObject hiveObj, IMetaStoreClient metaStoreClient) {
 		if (hiveObj != null) {
 			if (StringUtils.isNotBlank(hiveObj.getOwnerName())) {
 				resource.setOwnerUser(hiveObj.getOwnerName());
 				return;
 			}
+		}
+		setOwnerUserInternal(resource, hiveObj, metaStoreClient);
+	}
+
+	private static void setOwnerUserInternal(RangerHiveResource resource, HivePrivilegeObject hiveObj, IMetaStoreClient metaStoreClient) {
+		if (hiveObj != null) {
 			switch (hiveObj.getType()) {
 				case DATABASE:
 					try {
